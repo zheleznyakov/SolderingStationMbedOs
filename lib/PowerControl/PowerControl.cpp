@@ -41,7 +41,7 @@ void PowerControl::DimHeater1UP()
 {
             h1_ = 1;
             t1.detach();
-            t1.attach_us(callback(this,&PowerControl::DimHeater1Down),10);
+            t1.attach_us(callback(this,&PowerControl::DimHeater1Down),500);
 }
 void PowerControl::DimHeater1Down()
 {
@@ -52,7 +52,7 @@ void PowerControl::DimHeater2UP()
 {
             h2_ = 1;
             t2.detach();
-            t2.attach_us(callback(this,&PowerControl::DimHeater2Down),10);
+            t2.attach_us(callback(this,&PowerControl::DimHeater2Down),500);
 }
 void PowerControl::DimHeater2Down()
 {
@@ -63,7 +63,7 @@ void PowerControl::DimHeater3UP()
 {
             h3_ = 1;
             t3.detach();
-            t3.attach_us(callback(this,&PowerControl::DimHeater3Down),10);
+            t3.attach_us(callback(this,&PowerControl::DimHeater3Down),500);
 }
 void PowerControl::DimHeater3Down()
 {
@@ -74,7 +74,7 @@ void PowerControl::DimHeater4UP()
 {
             h4_ = 1;
             t4.detach();
-            t4.attach_us(callback(this,&PowerControl::DimHeater4Down),10);
+            t4.attach_us(callback(this,&PowerControl::DimHeater4Down),500);
 }
 void PowerControl::DimHeater4Down()
 {
@@ -85,7 +85,7 @@ void PowerControl::DimHeater5UP()
 {
             h5_ = 1;
             t5.detach();
-            t5.attach_us(callback(this,&PowerControl::DimHeater5Down),10);
+            t5.attach_us(callback(this,&PowerControl::DimHeater5Down),500);
 }
 void PowerControl::DimHeater5Down()
 {

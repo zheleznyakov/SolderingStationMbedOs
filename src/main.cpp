@@ -36,7 +36,7 @@ void ReadCommands()
 int main()
 {
     PowerControl P(D4,D11,D12,D13,D14,D15);
-    P.SetDimming(115,115,115,115,115);
+    P.SetDimming(110,110,110,110,110); //0-макс. яркость 124 -минимальная
     
 
     s.baud(115200);
