@@ -1,7 +1,13 @@
+/*
+* Автор - Железняков Андрей
+* Сайт - itworkclub.ru
+* 
+*/
 #include "mbed.h"
 #include "rtos.h"
 
 #include "PowerControl.h"
+#include "max6675.h"
 
 
 char readData[20];
@@ -17,9 +23,6 @@ void ReadCommands()
 {
     int counter = 0;
     while(1) {
-        //s.printf("h1.val=200%X%X%X",255,255,255);
-        //wait(1); // 1 second
-        //led = !led; // Toggle LED
         while (s2.readable()) {
             buf[counter]= s2.getc();
             counter++;
@@ -36,7 +39,10 @@ void ReadCommands()
 int main()
 {
     PowerControl P(D4,D11,D12,D13,D14,D15);
-    P.SetDimming(115,115,115,115,115);
+    P.SetDimming(110,110,110,110,110); //0-макс. яркость 124 -минимальная
+
+    SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
+    max6675 max(spi,PB_1);
     
 
     s.baud(115200);
@@ -44,11 +50,14 @@ int main()
     
     th1.start(ReadCommands);
     int i=0;
+    int temp;
     while(1) {
         Thread::wait(1000);
         //wait(1);
+        temp = max.read_temp();
         
-        s2.printf("tempn.val=%d%c%c%c",i,255,255,255);
+        s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
         i++;
+        s.printf("tempn.val=%f%c%c%c",temp,255,255,255);
     }
 }
