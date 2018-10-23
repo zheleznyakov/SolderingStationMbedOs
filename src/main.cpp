@@ -1,3 +1,8 @@
+/*
+* Автор - Железняков Андрей
+* Сайт - itworkclub.ru
+* 
+*/
 #include "mbed.h"
 #include "rtos.h"
 
@@ -17,9 +22,6 @@ void ReadCommands()
 {
     int counter = 0;
     while(1) {
-        //s.printf("h1.val=200%X%X%X",255,255,255);
-        //wait(1); // 1 second
-        //led = !led; // Toggle LED
         while (s2.readable()) {
             buf[counter]= s2.getc();
             counter++;
