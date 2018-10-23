@@ -58,6 +58,5 @@ int main()
         
         s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
         i++;
-        s.printf("tempn.val=%f%c%c%c",temp,255,255,255);
     }
 }

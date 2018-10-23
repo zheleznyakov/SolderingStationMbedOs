@@ -13,7 +13,7 @@ float max6675::read_temp() {
     uint8_t lowByte=0;
     
     select();  //выбор чипа устанавливает CS в 0
-    Thread::wait(250);
+    //Thread::wait(250);
     //wait(.25); //Эта задержка нужна для обновления данных о температуре
 
     highByte = spi.write(0); // отправляем два пустых
