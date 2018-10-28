@@ -18,10 +18,16 @@ class PowerControl
 {
 private:
     /* data */
-    int dim1,dim2,dim3, dim4, dimup; //переменные для задержки от 0 до 128 (0-0мкс, 128 - 10000мкс)
+    int dim1,dim2,dim3, dim4, dimup; //мощность от 0 до 250 (0-минимальная; 250 - максимальная)
 
     Ticker t1,t2,t3,t4,t5; // таймеры для влкючения и выключения симисторов
     InterruptIn ZeroCross_;// прерывание срабатывает по сигналу от детектора 0
+
+    /*массив D[Q]=t, где Q- мощность от 0 до 250(0-минимальная; 250-максимальная) t- задержка в микросекундах 
+    *  чем больше задержка, тем познее включится симистор, тем меньше мощность. Значения t посчитаны заранее, чтобы получить линейное приращение мощности
+    *  ссылка на статью https://habr.com/post/145991/
+    */
+    int d[251];
 
     DigitalOut h1_,h2_,h3_,h4_,h5_; // выводы для включения симисторов
     void Crossing(void); // обработчик прерывания детектора 0
@@ -35,6 +41,7 @@ private:
     void DimHeater4Down();
     void DimHeater5UP();
     void DimHeater5Down();
+    void setD(void);
       
 public:
 /*
@@ -44,7 +51,7 @@ public:
 */
     PowerControl(PinName ZeroCross, PinName h1, PinName h2, PinName h3, PinName h4, PinName hup);
 
-    void SetDimming(int d1, int d2, int d3, int d4, int dup); // Задает задержки для каждого из каналов от 0 до 128 (0-0мкс, 128 - 10000мкс)
+    void SetDimming(int d1, int d2, int d3, int d4, int dup); // Задает мощность для каждого из каналов от 0 до 250
 };
 
 

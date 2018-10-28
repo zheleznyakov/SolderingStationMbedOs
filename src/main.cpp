@@ -39,7 +39,7 @@ void ReadCommands()
 int main()
 {
     PowerControl P(D4,D11,D12,D13,D14,D15);
-    P.SetDimming(110,110,110,110,110); //0-макс. яркость 124 -минимальная
+    P.SetDimming(10,10,10,10,10); //0-макс. яркость 124 -минимальная
 
     SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
     max6675 max(spi,PB_1);
