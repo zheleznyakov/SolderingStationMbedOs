@@ -52,7 +52,7 @@ void PowerControl::DimHeater1UP()
 {
             h1_ = 1; // подаем на управлюящий первым симистором выход единицу
             t1.detach();// взводим таймер заново, чтобы через 300мкс снять управляющий сигнал с симистора
-            t1.attach_us(callback(this,&PowerControl::DimHeater1Down),300);
+            t1.attach_us(callback(this,&PowerControl::DimHeater1Down),5);
 }
 // DimHeater1Down() обработчик преывания, отключающий управляющий сигнал первого симистора
 // сам симистор отключится не сразу, а как только синусоида перейдет через 0 значение
@@ -65,7 +65,7 @@ void PowerControl::DimHeater2UP()
 {
             h2_ = 1;
             t2.detach();
-            t2.attach_us(callback(this,&PowerControl::DimHeater2Down),300);
+            t2.attach_us(callback(this,&PowerControl::DimHeater2Down),5);
 }
 void PowerControl::DimHeater2Down()
 {
@@ -76,7 +76,7 @@ void PowerControl::DimHeater3UP()
 {
             h3_ = 1;
             t3.detach();
-            t3.attach_us(callback(this,&PowerControl::DimHeater3Down),300);
+            t3.attach_us(callback(this,&PowerControl::DimHeater3Down),5);
 }
 void PowerControl::DimHeater3Down()
 {
@@ -87,7 +87,7 @@ void PowerControl::DimHeater4UP()
 {
             h4_ = 1;
             t4.detach();
-            t4.attach_us(callback(this,&PowerControl::DimHeater4Down),300);
+            t4.attach_us(callback(this,&PowerControl::DimHeater4Down),5);
 }
 void PowerControl::DimHeater4Down()
 {
@@ -98,7 +98,7 @@ void PowerControl::DimHeater5UP()
 {
             h5_ = 1;
             t5.detach();
-            t5.attach_us(callback(this,&PowerControl::DimHeater5Down),300);
+            t5.attach_us(callback(this,&PowerControl::DimHeater5Down),5);
 }
 void PowerControl::DimHeater5Down()
 {
