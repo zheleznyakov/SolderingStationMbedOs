@@ -5,7 +5,7 @@ max6675::max6675(SPI& _spi, PinName _ncs) : spi(_spi), ncs(_ncs) {
 
 }
 
-float max6675::read_temp() {
+    float max6675::read_temp() {
     short value = 0;
     float temp = 0;
     
