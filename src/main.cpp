@@ -21,7 +21,7 @@ Thread th1, downHeater;
 PowerControl P(D4,D11,D12,D13,D14,D15);
 SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
 max6675 max_sensor(spi,PB_1); // SPI, CS - chip select
-pid reg(max_sensor, 5);
+pid reg(max_sensor, 3,0,0);
 
 void DownHeat()
 {
@@ -29,7 +29,7 @@ void DownHeat()
     while(1)
     {
         p = reg.Power();
-        P.SetDimming(p, 1,1,1,1);
+        P.SetDimming(p, p,1,1,1);
         Thread::wait(500);
     }
 
@@ -61,7 +61,7 @@ int main()
     //0-мин мощность 249-максимальная при 250 симистор не удерживается открытым
     P.SetDimming(10,1,1,1,1); 
 
-    reg.SetTemperature(100);
+    reg.SetTemperature(70);
     
     
     th1.start(ReadCommands);

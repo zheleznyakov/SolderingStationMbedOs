@@ -16,6 +16,11 @@ class pid
 {
 private:
     int kp; // коэффицент пропорционального регулятора
+    int ki; 
+    int kd;
+    int previousError;
+    int integral;
+
     max6675 &max; // ссылка на объект термопары
     float requered_temp; // требуемая температура
     volatile float current_temp;// текущая температура
@@ -25,11 +30,13 @@ private:
 
     static void Compute(void const *arguments); // функция вычисляет можность исодя из заданной и текущей температуры
 public:
-    pid(max6675 &m,int kp_);
+    pid(max6675 &m,int kp_, int kd_, int ki_);
     float ReadTemp(); // возвращает текущую температуру не опрашивая термопару
     void SetTemperature(float t_); // задает требуемую температуру
     int Power(); // возвращает рассчитанную мощность
     float temp(); // возвращает текущую температуру из датчика max6675
+    int GetPreviousError();
+    void SetPriviousError(int er);
 
 };
 

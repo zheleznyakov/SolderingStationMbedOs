@@ -11,10 +11,14 @@
 /* pid::pid(max6675 &m,int kp_) 
 *  в конструктор передаем ссылку m на темопару max6675 и коэффицент регулятора kp_
 */
-pid::pid(max6675 &m,int kp_):max(m)
+pid::pid(max6675 &m,int kp_, int kd_, int ki_):max(m)
 {
 
     kp = kp_;
+    kd = kd_;
+    ki = ki_;
+    previousError = 0;
+    integral =0;
     requered_temp=30; //заданная температура по умолчанию
     power = 0; 
     
@@ -33,14 +37,19 @@ void pid::SetTemperature(float t_)
 void pid::Compute(void const *arguments)
 {
     pid *self = (pid*)arguments;
-    int error;
+    int error,x;
 
     self->current_temp = self->temp();
-        
+      
     error = self->requered_temp-self->current_temp;
-    if (error>0){
-        self->power = self->kp*error;
-        if (self->power>249) self->power = 249;
+    x = (error - self->previousError)*self->kd;  
+    self->previousError = error;
+    x+=error*self->kp;
+    self->integral+=self->ki*error;
+    x+=self->integral;
+    if (x>0){
+        if (x<=249) self->power = x;;
+        if (x>249) self->power = 249;
     }
     else{
         self->power = 0;
@@ -55,4 +64,12 @@ int pid::Power()
 float pid::temp()
 {
     return max.read_temp();
+}
+int pid::GetPreviousError()
+{
+    return previousError;
+}
+void pid::SetPriviousError(int er)
+{
+    previousError = er;
 }
