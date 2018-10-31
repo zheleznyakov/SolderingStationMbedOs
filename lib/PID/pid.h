@@ -1,3 +1,10 @@
+/*
+* Автор - Железняков Андрей
+* Сайт - itworkclub.ru
+* Класс pid представляет реализацию ПИД регулятора для нагревателя
+* Класс содержит таймер, который постоянно вычисляет требуемую мощность нагревателя
+* исходя из текущей и требуемой температуры.
+*/
 #ifndef PID_H
 #define PID_H
 
@@ -8,22 +15,21 @@
 class pid
 {
 private:
-    int kp;
-    max6675 &max;
-    float requered_temp;
-    volatile float current_temp;
-    Ticker tim;
-    Thread *t_cumpute;
-    RtosTimer *tim2;
-    volatile int power;
+    int kp; // коэффицент пропорционального регулятора
+    max6675 &max; // ссылка на объект термопары
+    float requered_temp; // требуемая температура
+    volatile float current_temp;// текущая температура
 
-    static void Compute(void const *arguments);
+    RtosTimer *tim2; // таймер вызывает функцию Compute для вычисления мощности
+    volatile int power; // рассчитанная мощность
+
+    static void Compute(void const *arguments); // функция вычисляет можность исодя из заданной и текущей температуры
 public:
     pid(max6675 &m,int kp_);
-    float ReadTemp();
-    void SetTemperature(float t_);
-    int Power();
-    float temp();
+    float ReadTemp(); // возвращает текущую температуру не опрашивая термопару
+    void SetTemperature(float t_); // задает требуемую температуру
+    int Power(); // возвращает рассчитанную мощность
+    float temp(); // возвращает текущую температуру из датчика max6675
 
 };
 

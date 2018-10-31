@@ -1,18 +1,24 @@
+/*
+* Автор - Железняков Андрей
+* Сайт - itworkclub.ru
+* Класс pid представляет реализацию ПИД регулятора для нагревателя
+* Класс содержит таймер, который постоянно вычисляет требуемую мощность нагревателя
+* исходя из текущей и требуемой температуры.
+*/
+
 #include "pid.h"
 
+/* pid::pid(max6675 &m,int kp_) 
+*  в конструктор передаем ссылку m на темопару max6675 и коэффицент регулятора kp_
+*/
 pid::pid(max6675 &m,int kp_):max(m)
 {
-    //max = m;
+
     kp = kp_;
-    requered_temp=30;
-    power = 0;
+    requered_temp=30; //заданная температура по умолчанию
+    power = 0; 
     
-    //Thread::wait(250000);
-    //t_cumpute.start(callback(this,&pid::Compute));
-    //tim.attach_us(callback(this,&pid::Compute),250000);
-    //t_cumpute = new Thread(pid::Compute);
-    //t_cumpute = new Thread(Compute,this);
-    //t_cumpute->set_priority(osprioryt)
+    // tim2- таймер, который считывает температуру и вычисляет мощность по алгоритму ПИД регулятора
     tim2= new RtosTimer(Compute, this);
     tim2->start(250);
 }
@@ -26,13 +32,9 @@ void pid::SetTemperature(float t_)
 }
 void pid::Compute(void const *arguments)
 {
-    int error;
-    //Thread::wait(1000);
-
     pid *self = (pid*)arguments;
-    //self->current_temp +=0.1;
-    
-    //current_temp = max.read_temp();
+    int error;
+
     self->current_temp = self->temp();
         
     error = self->requered_temp-self->current_temp;

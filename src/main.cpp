@@ -14,13 +14,13 @@
 char readData[20];
 char buf[20];
 DigitalOut led(LED1);
-Serial s(PA_2,PA_3);//tx,rx communication with pc
-Serial s2(PB_6,PA_10);
+Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
+Serial s2(PB_6,PA_10);// tx, rx связь с экраном nextion по uart
 Thread th1, downHeater;
 
 PowerControl P(D4,D11,D12,D13,D14,D15);
 SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
-max6675 max_sensor(spi,PB_1);
+max6675 max_sensor(spi,PB_1); // SPI, CS - chip select
 pid reg(max_sensor, 5);
 
 void DownHeat()
@@ -54,32 +54,25 @@ void ReadCommands()
 
 int main()
 {
-    //PowerControl P(D4,D11,D12,D13,D14,D15);
 
+    s.baud(115200);
+    s2.baud(115200);
     //SetDimming(нагр1, нагр2, нагр3, нагр4, верх)
     //0-мин мощность 249-максимальная при 250 симистор не удерживается открытым
     P.SetDimming(10,1,1,1,1); 
 
-
-    //SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
-    //max6675 max(spi,PB_1);
-    //pid reg(&max, 10);
-    reg.SetTemperature(70);
+    reg.SetTemperature(100);
     
-
-    s.baud(115200);
-    s2.baud(115200);
     
     th1.start(ReadCommands);
     downHeater.start(DownHeat);
-    int i=0;
+
     int temp;
     while(1) {
-        Thread::wait(1000);
+        Thread::wait(500);
         //wait(1);
         temp = reg.ReadTemp();
         
         s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
-        i++;
     }
 }
