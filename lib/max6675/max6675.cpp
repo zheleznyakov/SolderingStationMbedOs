@@ -5,7 +5,7 @@ max6675::max6675(SPI& _spi, PinName _ncs) : spi(_spi), ncs(_ncs) {
 
 }
 
-float max6675::read_temp() {
+    float max6675::read_temp() {
     short value = 0;
     float temp = 0;
     
@@ -13,7 +13,6 @@ float max6675::read_temp() {
     uint8_t lowByte=0;
     
     select();  //выбор чипа устанавливает CS в 0
-    Thread::wait(250);
     //wait(.25); //Эта задержка нужна для обновления данных о температуре
 
     highByte = spi.write(0); // отправляем два пустых
@@ -27,7 +26,7 @@ float max6675::read_temp() {
         value = (highByte << 5 | lowByte>>3); // выделим из полученных данных инф. о температуре (с 3 по 14 бит)
     }
 
-    temp = (value*0.25); // умножаем значение на чтобы получить ˚C или
+    temp = (value*0.25); // умножаем значение на 0.25 чтобы получить ˚C или
                          //  * (9.0/5.0)) + 32.0;   // чтобы получить ˚F 
 
 return temp;

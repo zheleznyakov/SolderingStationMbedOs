@@ -8,29 +8,80 @@
 
 #include "PowerControl.h"
 #include "max6675.h"
+#include "pid.h"
+#include <string>
 
-
+//using namespace std;
 char readData[20];
 char buf[20];
 DigitalOut led(LED1);
-Serial s(PA_2,PA_3);//tx,rx communication with pc
-Serial s2(PB_6,PA_10);
-Thread th1;
+Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
+Serial s2(PB_6,PA_10);// tx, rx связь с экраном nextion по uart
+Thread th1, downHeater;
 
+PowerControl P(D4,D11,D12,D13,D14,D15);
+SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
+max6675 max_sensor(spi,PB_1); // SPI, CS - chip select
+pid reg(max_sensor, 10,0,0);
 
+void DownHeat()
+{
+    int p;
+    while(1)
+    {
+        p = reg.Power();
+        P.SetDimming(p, p,1,1,1);
+        ThisThread::sleep_for(500);
+        //Thread::wait(500);
+    }
+
+}
 
 void ReadCommands()
 {
-    int counter = 0;
+    char a[30];
+    string str,command;
+    int data = 0;
+    str.clear();
+    int c = 0;
+
     while(1) {
         while (s2.readable()) {
-            buf[counter]= s2.getc();
-            counter++;
+            if (s2.getc()!='x')
+            {
+                while (s2.readable())
+                    s2.getc();
+            }
+            else
+            {
+                s2.scanf("%s",a);
+                c++;
+            }
+
         }
-        if (counter>0){
-            s.printf("%s",buf);
-            counter = 0;
+        if (c>0)
+            str.append(a);
+        c=0;
+        if (str.length()>0)
+        {
+            int pos =str.find("=");
+            if (pos!=-1)
+            {
+                command = str.substr(0,pos);
+                data = a[pos+2];
+                data = data<<8;
+                data = data|a[pos+1];
+                if (command=="sd")
+                {
+                    reg.SetTemperature(data);
+                }
+                s.printf("%s, data=%d", command.c_str(),data);
+                
+            }
         }
+        str.clear();
+        command.clear();
+        data = 0;
     }
     
 }
@@ -38,26 +89,33 @@ void ReadCommands()
 
 int main()
 {
-    PowerControl P(D4,D11,D12,D13,D14,D15);
-    P.SetDimming(110,110,110,110,110); //0-макс. яркость 124 -минимальная
-
-    SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
-    max6675 max(spi,PB_1);
-    
 
     s.baud(115200);
     s2.baud(115200);
+    //SetDimming(нагр1, нагр2, нагр3, нагр4, верх)
+    //0-мин мощность 249-максимальная при 250 симистор не удерживается открытым
+    P.SetDimming(10,1,1,1,1); 
+
+    reg.SetTemperature(90);
+    
     
     th1.start(ReadCommands);
-    int i=0;
+    downHeater.start(DownHeat);
+
     int temp;
     while(1) {
-        Thread::wait(1000);
+        ThisThread::sleep_for(500);
+        //Thread::wait(500);
         //wait(1);
-        temp = max.read_temp();
+        temp = reg.ReadTemp();
         
         s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
-        i++;
-        s.printf("tempn.val=%f%c%c%c",temp,255,255,255);
+        //ThisThread::sleep_for(500);
+        s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        //s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        //s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        s2.printf("tempz.val=%d%c%c%c",temp,255,255,255);
     }
 }
