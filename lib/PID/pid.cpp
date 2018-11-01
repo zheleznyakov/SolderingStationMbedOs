@@ -65,11 +65,3 @@ float pid::temp()
 {
     return max.read_temp();
 }
-int pid::GetPreviousError()
-{
-    return previousError;
-}
-void pid::SetPriviousError(int er)
-{
-    previousError = er;
-}

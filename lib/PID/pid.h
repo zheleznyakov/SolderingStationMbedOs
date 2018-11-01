@@ -10,7 +10,7 @@
 
 #include "mbed.h"
 #include "max6675.h"
-#include "rtos.h"
+//#include "rtos.h"
 
 class pid
 {
@@ -35,8 +35,6 @@ public:
     void SetTemperature(float t_); // задает требуемую температуру
     int Power(); // возвращает рассчитанную мощность
     float temp(); // возвращает текущую температуру из датчика max6675
-    int GetPreviousError();
-    void SetPriviousError(int er);
 
 };
 
