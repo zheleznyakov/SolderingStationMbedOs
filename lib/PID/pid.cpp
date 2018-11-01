@@ -54,9 +54,8 @@ void pid::Compute(void const *arguments)
     else{
         self->power = 0;
     }
-    
-    
 }
+
 int pid::Power()
 {
     return power;

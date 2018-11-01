@@ -11,19 +11,20 @@
 #include "pid.h"
 #include <string>
 
-//using namespace std;
-char readData[20];
-char buf[20];
-DigitalOut led(LED1);
+
 Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
 Serial s2(PB_6,PA_10);// tx, rx связь с экраном nextion по uart
 Thread th1, downHeater;
-
+// регулятор мощности PowerControl(PinName ZeroCross, PinName h1, PinName h2, PinName h3, PinName h4, PinName hup) 
 PowerControl P(D4,D11,D12,D13,D14,D15);
 SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
 max6675 max_sensor(spi,PB_1); // SPI, CS - chip select
-pid reg(max_sensor, 10,0,0);
 
+pid reg(max_sensor, 10,0,0); 
+
+/*
+*  DownHeat() - поток. Задает рассчитанную мощность каждые 500мс
+*/
 void DownHeat()
 {
     int p;
@@ -32,29 +33,32 @@ void DownHeat()
         p = reg.Power();
         P.SetDimming(p, p,1,1,1);
         ThisThread::sleep_for(500);
-        //Thread::wait(500);
     }
 
 }
-
+/*
+* ReadCommands ожидает поступление данных от touch панели и обрабатывает команды
+* мои команды начинаются с 'x'
+* пока есть только одна команда xsd=X, где xsd - команда (set down heater), X - температура(2 байта)  
+*/
 void ReadCommands()
 {
-    char a[30];
+    char a[30]; // буфер для приема команд
     string str,command;
     int data = 0;
-    str.clear();
     int c = 0;
 
     while(1) {
         while (s2.readable()) {
-            if (s2.getc()!='x')
+
+            if (s2.getc()!='x') // если первый символ не x, то эти данные нам не нужны
             {
                 while (s2.readable())
                     s2.getc();
             }
-            else
+            else 
             {
-                s2.scanf("%s",a);
+                s2.scanf("%s",a); 
                 c++;
             }
 
@@ -75,7 +79,7 @@ void ReadCommands()
                 {
                     reg.SetTemperature(data);
                 }
-                s.printf("%s, data=%d", command.c_str(),data);
+                s.printf("%s, data=%d", command.c_str(),data); //(для отладки)выводим в com порт компьютера полученную команду и данные
                 
             }
         }
@@ -90,32 +94,39 @@ void ReadCommands()
 int main()
 {
 
-    s.baud(115200);
-    s2.baud(115200);
+    s.baud(115200); // связь с комьютером
+    s2.baud(115200);// связь с nextion
     //SetDimming(нагр1, нагр2, нагр3, нагр4, верх)
     //0-мин мощность 249-максимальная при 250 симистор не удерживается открытым
     P.SetDimming(10,1,1,1,1); 
 
-    reg.SetTemperature(90);
+    reg.SetTemperature(15);
     
-    
+    // запускаем поток для приема команд от дисплея
     th1.start(ReadCommands);
+    // запускаем поток для ПИД регулятора низа
     downHeater.start(DownHeat);
 
-    int temp;
+    int temp; // текущая температура
+    if (s2.writable())
+    {
+        s2.printf("h1.val=%d%c%c%c",15,255,255,255);
+        s2.printf("man_down.val=%d%c%c%c",15,255,255,255);
+    }
     while(1) {
         ThisThread::sleep_for(500);
-        //Thread::wait(500);
-        //wait(1);
+
         temp = reg.ReadTemp();
-        
-        s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
-        //ThisThread::sleep_for(500);
-        s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
-        s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
-        s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
-        //s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
-        //s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
-        s2.printf("tempz.val=%d%c%c%c",temp,255,255,255);
+        if (s2.writable())
+        {
+            // tempn - значение температуры, отображаемое на экране Nextion, задающем температуры 
+            s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
+            // отправляем три одинаковых точки на график для того, чтобы график шёл с более быстрой скоростью
+            s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+            s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+            s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+            // tempz - значение текущей температуры, отображаемое на странице Nextion с графиком
+            s2.printf("tempz.val=%d%c%c%c",temp,255,255,255);
+        }
     }
 }
