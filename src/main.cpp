@@ -31,7 +31,8 @@ void DownHeat()
     {
         p = reg.Power();
         P.SetDimming(p, p,1,1,1);
-        Thread::wait(500);
+        ThisThread::sleep_for(500);
+        //Thread::wait(500);
     }
 
 }
@@ -45,12 +46,22 @@ void ReadCommands()
     int c = 0;
 
     while(1) {
-        if (s2.readable()) {
-            s2.scanf("%s",a);
-            c++;
+        while (s2.readable()) {
+            if (s2.getc()!='x')
+            {
+                while (s2.readable())
+                    s2.getc();
+            }
+            else
+            {
+                s2.scanf("%s",a);
+                c++;
+            }
 
-            str.append(a);
         }
+        if (c>0)
+            str.append(a);
+        c=0;
         if (str.length()>0)
         {
             int pos =str.find("=");
@@ -60,15 +71,17 @@ void ReadCommands()
                 data = a[pos+2];
                 data = data<<8;
                 data = data|a[pos+1];
-                if (command=="setdown")
+                if (command=="sd")
                 {
                     reg.SetTemperature(data);
                 }
                 s.printf("%s, data=%d", command.c_str(),data);
-                str.clear();
+                
             }
         }
-
+        str.clear();
+        command.clear();
+        data = 0;
     }
     
 }
@@ -91,10 +104,18 @@ int main()
 
     int temp;
     while(1) {
-        Thread::wait(500);
+        ThisThread::sleep_for(500);
+        //Thread::wait(500);
         //wait(1);
         temp = reg.ReadTemp();
         
         s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
+        //ThisThread::sleep_for(500);
+        s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        //s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        //s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+        s2.printf("tempz.val=%d%c%c%c",temp,255,255,255);
     }
 }
