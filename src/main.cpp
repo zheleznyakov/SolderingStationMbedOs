@@ -20,7 +20,7 @@ PowerControl P(D4,D11,D12,D13,D14,D15);
 SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
 max6675 max_sensor(spi,PB_1); // SPI, CS - chip select
 
-pid reg(max_sensor, 10,0,0); 
+pid reg(max_sensor,P, 20,0,0); 
 
 /*
 *  DownHeat() - поток. Задает рассчитанную мощность каждые 500мс
@@ -105,7 +105,7 @@ int main()
     // запускаем поток для приема команд от дисплея
     th1.start(ReadCommands);
     // запускаем поток для ПИД регулятора низа
-    downHeater.start(DownHeat);
+    //downHeater.start(DownHeat);
 
     int temp; // текущая температура
     if (s2.writable())
@@ -119,7 +119,7 @@ int main()
         temp = reg.ReadTemp();
         if (s2.writable())
         {
-            // tempn - значение температуры, отображаемое на экране Nextion, задающем температуры 
+            // tempn - значение температуры, отображаемое на экране Nextion (экран со слайдером) 
             s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
             // отправляем три одинаковых точки на график для того, чтобы график шёл с более быстрой скоростью
             s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);

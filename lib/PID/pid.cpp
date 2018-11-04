@@ -9,9 +9,9 @@
 #include "pid.h"
 
 /* pid::pid(max6675 &m,int kp_) 
-*  в конструктор передаем ссылку m на темопару max6675 и коэффицент регулятора kp_
+*  в конструктор передаем ссылку m на темопару max6675, ссылку pc на фазовый регулятор и коэффиценты регулятора kp_, kd_, ki_
 */
-pid::pid(max6675 &m,int kp_, int kd_, int ki_):max(m)
+pid::pid(max6675 &m, PowerControl &pc,int kp_, int kd_, int ki_):max(m), pcontrol(pc)
 {
 
     kp = kp_;
@@ -24,7 +24,7 @@ pid::pid(max6675 &m,int kp_, int kd_, int ki_):max(m)
     
     // tim2- таймер, который считывает температуру и вычисляет мощность по алгоритму ПИД регулятора
     tim2= new RtosTimer(Compute, this);
-    tim2->start(250);
+    tim2->start(1000);
 }
 float pid::ReadTemp()
 {
@@ -54,6 +54,7 @@ void pid::Compute(void const *arguments)
     else{
         self->power = 0;
     }
+    self->pcontrol.SetDimming(self->power,self->power,1,1,1);
 }
 
 int pid::Power()
