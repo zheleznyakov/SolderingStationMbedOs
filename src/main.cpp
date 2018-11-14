@@ -20,7 +20,7 @@ PowerControl P(D4,D11,D12,D13,D14,D15);
 SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
 max6675 max_sensor(spi,PB_1); // SPI, CS - chip select
 
-pid reg(max_sensor,P, 10,30,0); 
+pid reg(max_sensor,P, 7,50,0); 
 
 
 /*
