@@ -20,22 +20,9 @@ PowerControl P(D4,D11,D12,D13,D14,D15);
 SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK
 max6675 max_sensor(spi,PB_1); // SPI, CS - chip select
 
-pid reg(max_sensor,P, 20,0,0); 
+pid reg(max_sensor,P, 10,30,0); 
 
-/*
-*  DownHeat() - поток. Задает рассчитанную мощность каждые 500мс
-*/
-void DownHeat()
-{
-    int p;
-    while(1)
-    {
-        p = reg.Power();
-        P.SetDimming(p, p,1,1,1);
-        ThisThread::sleep_for(500);
-    }
 
-}
 /*
 * ReadCommands ожидает поступление данных от touch панели и обрабатывает команды
 * мои команды начинаются с 'x'
@@ -98,7 +85,7 @@ int main()
     s2.baud(115200);// связь с nextion
     //SetDimming(нагр1, нагр2, нагр3, нагр4, верх)
     //0-мин мощность 249-максимальная при 250 симистор не удерживается открытым
-    P.SetDimming(10,1,1,1,1); 
+    P.SetDimming(0,0,0,0,0); 
 
     reg.SetTemperature(15);
     
@@ -114,9 +101,9 @@ int main()
         s2.printf("man_down.val=%d%c%c%c",15,255,255,255);
     }
     while(1) {
-        ThisThread::sleep_for(500);
+        ThisThread::sleep_for(1000);
 
-        temp = reg.ReadTemp();
+        temp = reg.temp();
         if (s2.writable())
         {
             // tempn - значение температуры, отображаемое на экране Nextion (экран со слайдером) 

@@ -24,7 +24,7 @@ pid::pid(max6675 &m, PowerControl &pc,int kp_, int kd_, int ki_):max(m), pcontro
     
     // tim2- таймер, который считывает температуру и вычисляет мощность по алгоритму ПИД регулятора
     tim2= new RtosTimer(Compute, this);
-    tim2->start(1000);
+    tim2->start(10000);
 }
 float pid::ReadTemp()
 {
@@ -39,7 +39,7 @@ void pid::Compute(void const *arguments)
     pid *self = (pid*)arguments;
     int error,x;
 
-    self->current_temp = self->temp();
+    //self->current_temp = self->temp();
       
     error = self->requered_temp-self->current_temp;
     x = (error - self->previousError)*self->kd;  
@@ -48,13 +48,13 @@ void pid::Compute(void const *arguments)
     self->integral+=self->ki*error;
     x+=self->integral;
     if (x>0){
-        if (x<=249) self->power = x;;
-        if (x>249) self->power = 249;
+        if (x<=200) self->power = x;;
+        if (x>200) self->power = 200;
     }
     else{
         self->power = 0;
     }
-    self->pcontrol.SetDimming(self->power,self->power,1,1,1);
+    self->pcontrol.SetDimming(self->power,self->power,self->power,self->power,1);
 }
 
 int pid::Power()
@@ -63,5 +63,7 @@ int pid::Power()
 }
 float pid::temp()
 {
-    return max.read_temp();
+    current_temp = max.read_temp();
+    return current_temp;
+    
 }
