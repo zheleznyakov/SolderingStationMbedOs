@@ -11,7 +11,7 @@
 /* pid::pid(max6675 &m,int kp_) 
 *  в конструктор передаем ссылку m на темопару max6675, ссылку pc на фазовый регулятор и коэффиценты регулятора kp_, kd_, ki_
 */
-pid::pid(max6675 &m, PowerControl &pc,int kp_, int kd_, int ki_):max(m), pcontrol(pc)
+pid::pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_):max(m), pcontrol(pc)
 {
 
     kp = kp_;
@@ -45,7 +45,7 @@ void pid::Compute(void const *arguments)
     x = (error - self->previousError)*self->kd;  
     self->previousError = error;
     x+=error*self->kp;
-    self->integral+=self->ki*error;
+    self->integral+=self->ki*(double)error;
     x+=self->integral;
     if (x>0){
         if (x<=200) self->power = x;;

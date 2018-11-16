@@ -16,10 +16,10 @@ class pid
 {
 private:
     int kp; // коэффицент пропорционального регулятора
-    int ki; 
+    double ki; 
     int kd;
     int previousError;
-    int integral;
+    double integral;
 
     max6675 &max; // ссылка на объект термопары
     PowerControl &pcontrol; // ссылка на фазовый регулятор
@@ -31,7 +31,7 @@ private:
 
     static void Compute(void const *arguments); // функция вычисляет можность исодя из заданной и текущей температуры
 public:
-    pid(max6675 &m, PowerControl &pc,int kp_, int kd_, int ki_);
+    pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_);
     float ReadTemp(); // возвращает текущую температуру не опрашивая термопару
     void SetTemperature(float t_); // задает требуемую температуру
     int Power(); // возвращает рассчитанную мощность
