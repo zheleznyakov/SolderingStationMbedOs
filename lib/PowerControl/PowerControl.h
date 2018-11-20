@@ -19,6 +19,7 @@ class PowerControl
 private:
     /* data */
     int dim1,dim2,dim3, dim4, dimup; //мощность от 0 до 250 (0-минимальная; 250 - максимальная)
+    int heater[4]={1,1,1,1};
 
     Ticker t1,t2,t3,t4,t5; // таймеры для влкючения и выключения симисторов
     InterruptIn ZeroCross_;// прерывание срабатывает по сигналу от детектора 0
@@ -52,6 +53,7 @@ public:
     PowerControl(PinName ZeroCross, PinName h1, PinName h2, PinName h3, PinName h4, PinName hup);
 
     void SetDimming(int d1, int d2, int d3, int d4, int dup); // Задает мощность для каждого из каналов от 0 до 250
+    int ToggleHeater(int h);
 };
 
 
