@@ -20,7 +20,7 @@ private:
     int kd;
     int previousError;
     double integral;
-
+    int *spiFlag;
     max6675 &max; // ссылка на объект термопары
     PowerControl &pcontrol; // ссылка на фазовый регулятор
     float requered_temp; // требуемая температура
@@ -31,7 +31,7 @@ private:
 
     static void Compute(void const *arguments); // функция вычисляет можность исодя из заданной и текущей температуры
 public:
-    pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_);
+    pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_, int *flag);
     float ReadTemp(); // возвращает текущую температуру не опрашивая термопару
     void SetTemperature(float t_); // задает требуемую температуру
     int Power(); // возвращает рассчитанную мощность

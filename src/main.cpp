@@ -13,6 +13,7 @@
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 
+int SPIflag;
 Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
 Serial s2(PB_6,PA_10);// tx, rx связь с экраном nextion по uart
 Thread th1; // поток для обработки комманд от дисплея
@@ -23,7 +24,7 @@ max6675 max_sensor(spi,PB_1); // SPI, CS - chip select первая термоп
 max6675 max_sensor2(spi,PA_8); // SPI, CS - chip select вторая термопара
 max6675 max_sensor_overheat(spi,PB_10); // SPI, CS - chip select термопара для измерения температуры корпуса
 
-pid reg(max_sensor,P, 7,50,0); // ПИД регулятор pid(max6675 obj, powercontrol obj, kp, kd, ki)
+pid reg(max_sensor,P, 7,50,0, &SPIflag); // ПИД регулятор pid(max6675 obj, powercontrol obj, kp, kd, ki)
 int displayPage; // текущая страница, на которой находится дисплей
 
 /* Дисплей nextion не умеет запоминать точки на графике
@@ -143,7 +144,7 @@ int main()
     reg.SetTemperature(15);
     graphPre = 15;
     displayPage = 0;
-
+    SPIflag = false; //spi не занят
     ThisThread::sleep_for(200);
 
     // инициализируем массивы для графиков текущей температурой
@@ -181,12 +182,14 @@ int main()
     while(1) {
         ThisThread::sleep_for(1000);
 
-        temp = reg.temp(); 
+        while (SPIflag){ThisThread::sleep_for(10);}
+        SPIflag = 1;
+        temp = max_sensor.read_temp();
         ThisThread::sleep_for(10);
         tempu = max_sensor2.read_temp();
         ThisThread::sleep_for(10);
         tempc = max_sensor_overheat.read_temp();
-
+        SPIflag = 0;
         // записываем текущую температуру в массивы для отображения на графиках
         graphDown[graphPos] = temp;
         graphUp[graphPos] = tempu;

@@ -11,7 +11,7 @@
 /* pid::pid(max6675 &m,int kp_) 
 *  в конструктор передаем ссылку m на темопару max6675, ссылку pc на фазовый регулятор и коэффиценты регулятора kp_, kd_, ki_
 */
-pid::pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_):max(m), pcontrol(pc)
+pid::pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_, int *flag):max(m), pcontrol(pc)
 {
 
     kp = kp_;
@@ -21,10 +21,11 @@ pid::pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_):max(m), pcon
     integral =0;
     requered_temp=30; //заданная температура по умолчанию
     power = 0; 
+    spiFlag = flag;
     
     // tim2- таймер, который считывает температуру и вычисляет мощность по алгоритму ПИД регулятора
     tim2= new RtosTimer(Compute, this);
-    tim2->start(5000);
+    tim2->start(2500);
 }
 float pid::ReadTemp()
 {
@@ -40,7 +41,7 @@ void pid::Compute(void const *arguments)
     pid *self = (pid*)arguments;
     int error,x;
 
-    //self->current_temp = self->temp();
+    self->current_temp = self->temp();
       
     error = self->requered_temp-self->current_temp;
     x = (error - self->previousError)*self->kd;  
@@ -64,7 +65,10 @@ int pid::Power()
 }
 float pid::temp()
 {
+    while (*spiFlag){wait_ms(10);}
+    *spiFlag = 1;
     current_temp = max.read_temp();
+    *spiFlag = 0;
     return current_temp;
     
 }
