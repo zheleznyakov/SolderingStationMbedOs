@@ -33,6 +33,7 @@ float pid::ReadTemp()
 void pid::SetTemperature(float t_)
 {
     requered_temp = t_;
+    integral = 0;
 }
 void pid::Compute(void const *arguments)
 {

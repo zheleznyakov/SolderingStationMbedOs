@@ -10,7 +10,8 @@
 #include "max6675.h"
 #include "pid.h"
 #include <string>
-
+#include "SDBlockDevice.h"
+#include "FATFileSystem.h"
 
 Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
 Serial s2(PB_6,PA_10);// tx, rx связь с экраном nextion по uart
@@ -22,7 +23,18 @@ max6675 max_sensor(spi,PB_1); // SPI, CS - chip select
 max6675 max_sensor2(spi,PA_8); // SPI, CS - chip select
 max6675 max_sensor_overheat(spi,PB_10); // SPI, CS - chip select
 
-pid reg(max_sensor,P, 7,50,0.5); 
+pid reg(max_sensor,P, 7,50,0); 
+int displayPage; // текущая страница, на которой находится дисплей
+int graph1[309]; // график низ
+int graphUp[309]; // график верх
+int graphPre; //график преднагрева
+int graphSold; //график пайки
+int graphPos1;
+
+
+//SDBlockDevice sd(PC_3,PC_2,PC_7,PC_15);
+//FATFileSystem fs("fs");
+
 
 
 /*
@@ -66,7 +78,33 @@ void ReadCommands()
                 data = data|a[pos+1];
                 if (command=="sd")
                 {
+                    displayPage=0;
+                    
+                    graphPre = data;
+                    ThisThread::sleep_for(200); // пауза нужна для того, чтобы дисплей распознал команду(он только что передавал данные, теперь ему нужно их читать)
+                    while(!s2.writable()){ThisThread::sleep_for(50);}
+                    s2.printf("ref_stop%c%c%c",255,255,255);
+                    s2.printf("page %d%c%c%c",2,255,255,255);
+                    int j=graphPos1;
+                    for (int i=0;i<309;i++)
+                    {
+                        if (j>308) j=0;
+                        s2.printf("add 1,0,%d%c%c%c",graph1[j],255,255,255);
+                        s2.printf("add 1,1,%d%c%c%c",graphUp[j],255,255,255);
+                        s2.printf("add 1,3,%d%c%c%c",graphPre,255,255,255);
+                        ThisThread::sleep_for(2);
+                        j++;
+                    }
+                    s2.printf("ref_star%c%c%c",255,255,255);
+                    displayPage = 2;
                     reg.SetTemperature(data);
+                }
+                if (command == "page")
+                {
+                    displayPage = data;
+                    while(!s2.writable()){ThisThread::sleep_for(50);}
+                        s2.printf("page %d%c%c%c",data,255,255,255);
+
                 }
                 s.printf("%s, data=%d", command.c_str(),data); //(для отладки)выводим в com порт компьютера полученную команду и данные
                 
@@ -90,6 +128,28 @@ int main()
     P.SetDimming(0,0,0,0,0); 
 
     reg.SetTemperature(15);
+    graphPre = 15;
+    displayPage = 0;
+
+    ThisThread::sleep_for(200);
+    int tdown = max_sensor.read_temp();
+    int tup = max_sensor2.read_temp();
+    for (int i=0;i<=308;i++)
+    {
+        graph1[i] = tdown;
+        graphUp[i] = tup;
+    }
+    graphPos1=0;
+    /*sd.init();
+    fs.mount(&sd);
+
+    FILE* fd = fopen("/fs/hi.txt", "w");
+    fprintf(fd, "hello!");
+    fclose(fd);
+
+    sd.deinit();
+    fs.unmount();*/
+
     
     // запускаем поток для приема команд от дисплея
     th1.start(ReadCommands);
@@ -104,27 +164,39 @@ int main()
         s2.printf("man_down.val=%d%c%c%c",15,255,255,255);
     }
     while(1) {
-        ThisThread::sleep_for(500);
+        ThisThread::sleep_for(1000);
 
         temp = reg.temp();
-        ThisThread::sleep_for(200);
+        ThisThread::sleep_for(10);
         tempu = max_sensor2.read_temp();
-        ThisThread::sleep_for(200);
+        ThisThread::sleep_for(10);
         tempc = max_sensor_overheat.read_temp();
+
+        graph1[graphPos1] = temp;
+        graphUp[graphPos1] = tempu;
+        graphPos1++;
+        if (graphPos1>308) graphPos1=0;
 
 
         if (s2.writable())
         {
-            // tempn - значение температуры, отображаемое на экране Nextion (экран со слайдером) 
-            s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
-            // отправляем три одинаковых точки на график для того, чтобы график шёл с более быстрой скоростью
-            s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
-                //s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
-                //s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
-            // tempz - значение текущей температуры, отображаемое на странице Nextion с графиком
-            s2.printf("tempz.val=%d%c%c%c",temp,255,255,255);
-            s2.printf("tempzup.val=%d%c%c%c",tempu,255,255,255);
-            s2.printf("tempzcase.val=%d%c%c%c",tempc,255,255,255);
+            if (displayPage == 1){
+                // tempn - значение температуры, отображаемое на экране Nextion (экран со слайдером) 
+                s2.printf("tempn.val=%d%c%c%c",temp,255,255,255);
+            }
+            if (displayPage==2)
+            {
+                // отправляем точку на график
+                s2.printf("add 1,0,%d%c%c%c",temp,255,255,255);
+                s2.printf("add 1,1,%d%c%c%c",tempu,255,255,255);
+                // tempz - значение текущей температуры, отображаемое на странице Nextion с графиком
+                s2.printf("tempz.val=%d%c%c%c",temp,255,255,255);
+                s2.printf("tempzup.val=%d%c%c%c",tempu,255,255,255);
+                s2.printf("tempzcase.val=%d%c%c%c",tempc,255,255,255);
+
+            }
+            
+            
         }
     }
 }
