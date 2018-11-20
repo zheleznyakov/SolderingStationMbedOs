@@ -24,7 +24,7 @@ pid::pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_):max(m), pcon
     
     // tim2- таймер, который считывает температуру и вычисляет мощность по алгоритму ПИД регулятора
     tim2= new RtosTimer(Compute, this);
-    tim2->start(10000);
+    tim2->start(5000);
 }
 float pid::ReadTemp()
 {
