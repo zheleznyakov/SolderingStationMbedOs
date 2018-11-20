@@ -40,7 +40,7 @@ int graphPre; //значение температуры преднагрева
 int graphSold; //значение температуры пайки
 int graphPos; 
 
-
+void ShowPage2();
 //SDBlockDevice sd(PC_3,PC_2,PC_7,PC_15);
 //FATFileSystem fs("fs");
 
@@ -89,28 +89,11 @@ void ReadCommands()
                 if (command=="sd") //sd - set down. Команда устанавливает температуру для нагрева нижним нагревателем
                 {
                     // по команде sd открывается страница с графиками, сейчас нужно будет передавать массивы точек
-                    // устанавливаем текущую странцу дисплея в 0, чтобы не шёл лишний обмен данными с экраном
-                    // на нулевой странице нет обновляемых данных
-                    prevPage = displayPage;
-                    displayPage=0; 
+                     
                     
                     graphPre = data; // зеленая линия на графике, указывающая температуру до которой нужно нагреть
                     ThisThread::sleep_for(200); // пауза нужна для того, чтобы дисплей распознал команду(он только что передавал данные, теперь ему нужно их читать)
-                    while(!s2.writable()){ThisThread::sleep_for(50);} 
-                    s2.printf("ref_stop%c%c%c",255,255,255); // команда сообщает дисплею, что пока не нужно обновлять инф. на дисплее
-                    s2.printf("page %d%c%c%c",2,255,255,255);// отображаем 2 страницу на дисплее
-                    int j=graphPos;// узнаем текущее положение слайдера на массиве
-                    for (int i=0;i<309;i++) // на график влазит 309 точек
-                    {
-                        if (j>308) j=0;
-                        s2.printf("add 1,0,%d%c%c%c",graphDown[j],255,255,255); //синяя линия
-                        s2.printf("add 1,1,%d%c%c%c",graphUp[j],255,255,255); //желтая линия
-                        s2.printf("add 1,3,%d%c%c%c",graphPre,255,255,255); //зеленая линия
-                        ThisThread::sleep_for(2);
-                        j++;
-                    }
-                    s2.printf("ref_star%c%c%c",255,255,255); // разрешаем дисплею отобразить изменения
-                    displayPage = 2; 
+                    ShowPage2();
                     reg.SetTemperature(data); // даем задание ПИД регулятору
                 }
                 if (command == "page") // если была нажата кнопка перехода на другую страницу дисплея
@@ -119,13 +102,23 @@ void ReadCommands()
                     {
                         prevPage = displayPage;
                         displayPage = data; 
-                        while(!s2.writable()){ThisThread::sleep_for(50);}
-                        s2.printf("page %d%c%c%c",data,255,255,255);// отправляем команду на смену страницы
+                        if (data == 2){ShowPage2();}
+                        else{
+                            while(!s2.writable()){ThisThread::sleep_for(50);}
+                            s2.printf("page %d%c%c%c",data,255,255,255);// отправляем команду на смену страницы
+                        }
                     }
                     else{
                         displayPage = prevPage;
-                        while(!s2.writable()){ThisThread::sleep_for(50);}
-                        s2.printf("page %d%c%c%c",prevPage,255,255,255);// отправляем команду на смену страницы
+                        if (prevPage==2)
+                        {
+                            ShowPage2();
+                        }
+                        else
+                        {
+                            while(!s2.writable()){ThisThread::sleep_for(50);}
+                            s2.printf("page %d%c%c%c",prevPage,255,255,255);// отправляем команду на смену страницы
+                        }
 
                     }
                     
@@ -249,4 +242,26 @@ int main()
             
         }
     }
+}
+void ShowPage2()
+{
+    // устанавливаем текущую странцу дисплея в 0, чтобы не шёл лишний обмен данными с экраном
+    // на нулевой странице нет обновляемых данных
+    prevPage = displayPage;
+    displayPage=0;
+    while(!s2.writable()){ThisThread::sleep_for(50);} 
+    s2.printf("ref_stop%c%c%c",255,255,255); // команда сообщает дисплею, что пока не нужно обновлять инф. на дисплее
+    s2.printf("page %d%c%c%c",2,255,255,255);// отображаем 2 страницу на дисплее
+    int j=graphPos;// узнаем текущее положение слайдера на массиве
+    for (int i=0;i<309;i++) // на график влазит 309 точек
+    {
+        if (j>308) j=0;
+        s2.printf("add 1,0,%d%c%c%c",graphDown[j],255,255,255); //синяя линия
+        s2.printf("add 1,1,%d%c%c%c",graphUp[j],255,255,255); //желтая линия
+        s2.printf("add 1,3,%d%c%c%c",graphPre,255,255,255); //зеленая линия
+        ThisThread::sleep_for(2);
+        j++;
+    }
+    s2.printf("ref_star%c%c%c",255,255,255); // разрешаем дисплею отобразить изменения
+    displayPage = 2; 
 }
