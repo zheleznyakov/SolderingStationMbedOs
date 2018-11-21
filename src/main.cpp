@@ -53,6 +53,7 @@ void ShowPage2();
 */
 void ReadCommands()
 {
+    
     char a[30]; // буфер для приема команд
     string str,command; 
     int data = 0;
@@ -83,9 +84,12 @@ void ReadCommands()
             if (pos!=-1)
             {
                 command = str.substr(0,pos); 
-                data = a[pos+2];
-                data = data<<8;
-                data = data|a[pos+1];
+                data = atoi(a+pos+1);
+                //data = a[pos+2];
+                //data = data<<8;
+                //data = data|a[pos+1];
+                //s.printf("%s, data=%d", a,data); //(для отладки)выводим в com порт компьютера полученную команду и данные
+                //return;
                 if (command=="sd") //sd - set down. Команда устанавливает температуру для нагрева нижним нагревателем
                 {
                     // по команде sd открывается страница с графиками, сейчас нужно будет передавать массивы точек
@@ -143,7 +147,7 @@ void ReadCommands()
                             P.ToggleHeater(data);
                     }
                 }
-                s.printf("%s, data=%d", command.c_str(),data); //(для отладки)выводим в com порт компьютера полученную команду и данные
+                s.printf("%s, data=%d", a,data); //(для отладки)выводим в com порт компьютера полученную команду и данные
                 
             }
         }
