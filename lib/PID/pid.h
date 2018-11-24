@@ -15,7 +15,7 @@
 class pid
 {
 private:
-    int kp; // коэффицент пропорционального регулятора
+    double kp; // коэффицент пропорционального регулятора
     double ki; 
     int kd;
     int previousError;
@@ -31,7 +31,7 @@ private:
 
     static void Compute(void const *arguments); // функция вычисляет можность исодя из заданной и текущей температуры
 public:
-    pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_, int *flag);
+    pid(max6675 &m, PowerControl &pc,double kp_, int kd_, double ki_, int *flag);
     float ReadTemp(); // возвращает текущую температуру не опрашивая термопару
     void SetTemperature(float t_); // задает требуемую температуру
     int Power(); // возвращает рассчитанную мощность

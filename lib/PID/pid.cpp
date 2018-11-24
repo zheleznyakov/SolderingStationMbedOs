@@ -12,7 +12,7 @@
 *  в конструктор передаем ссылку m на темопару max6675, ссылку pc на фазовый регулятор и коэффиценты регулятора kp_, kd_, ki_
 *  flag - флаг SPI 1- занят; 0 - свободен
 */
-pid::pid(max6675 &m, PowerControl &pc,int kp_, int kd_, double ki_, int *flag):max(m), pcontrol(pc)
+pid::pid(max6675 &m, PowerControl &pc,double kp_, int kd_, double ki_, int *flag):max(m), pcontrol(pc)
 {
 
     kp = kp_;
@@ -40,11 +40,12 @@ void pid::SetTemperature(float t_)
 void pid::Compute(void const *arguments)
 {
     pid *self = (pid*)arguments;
-    int error,x;
+    double error,x;
 
     self->current_temp = self->temp();
       
     error = self->requered_temp-self->current_temp;
+    //if (error<0) self->integral=0;
     x = (error - self->previousError)*self->kd;  
     self->previousError = error;
     x+=error*self->kp;

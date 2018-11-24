@@ -24,7 +24,7 @@ max6675 max_sensor(spi,PB_1); // SPI, CS - chip select первая термоп
 max6675 max_sensor2(spi,PA_8); // SPI, CS - chip select вторая термопара
 max6675 max_sensor_overheat(spi,PB_10); // SPI, CS - chip select термопара для измерения температуры корпуса
 
-pid reg(max_sensor,P, 7,50,0, &SPIflag); // ПИД регулятор pid(max6675 obj, powercontrol obj, kp, kd, ki)
+pid reg(max_sensor,P, 7,100,0, &SPIflag); // ПИД регулятор pid(max6675 obj, powercontrol obj, kp, kd, ki)
 int displayPage, prevPage; // текущая страница, на которой находится дисплей
 
 /* Дисплей nextion не умеет запоминать точки на графике
@@ -64,8 +64,12 @@ void ReadCommands()
 
             if (s2.getc()!='x') // если первый символ не x, то эти данные нам не нужны
             {
+                char b;
                 while (s2.readable())
-                    s2.getc();
+                {
+                    b=s2.getc();
+                    s.printf("data=%c", b);
+                }
             }
             else 
             {
@@ -85,11 +89,7 @@ void ReadCommands()
             {
                 command = str.substr(0,pos); 
                 data = atoi(a+pos+1);
-                //data = a[pos+2];
-                //data = data<<8;
-                //data = data|a[pos+1];
-                //s.printf("%s, data=%d", a,data); //(для отладки)выводим в com порт компьютера полученную команду и данные
-                //return;
+
                 if (command=="sd") //sd - set down. Команда устанавливает температуру для нагрева нижним нагревателем
                 {
                     // по команде sd открывается страница с графиками, сейчас нужно будет передавать массивы точек
@@ -102,35 +102,30 @@ void ReadCommands()
                 }
                 if (command == "page") // если была нажата кнопка перехода на другую страницу дисплея
                 {
-                    if (data!=60) //60 означает переход на предыдущую страницу
-                    {
                         prevPage = displayPage;
                         displayPage = data; 
                         if (data == 2){ShowPage2();}
                         else{
-                            while(!s2.writable()){ThisThread::sleep_for(50);}
+                            while(!s2.writable()){ThisThread::sleep_for(5);}
                             s2.printf("page %d%c%c%c",data,255,255,255);// отправляем команду на смену страницы
                         }
-                    }
-                    else{
-                        displayPage = prevPage;
+                }
+                if (command == "back")
+                {
+                    displayPage = prevPage;
                         if (prevPage==2)
                         {
                             ShowPage2();
                         }
                         else
                         {
-                            while(!s2.writable()){ThisThread::sleep_for(50);}
+                            while(!s2.writable()){ThisThread::sleep_for(5);}
                             s2.printf("page %d%c%c%c",prevPage,255,255,255);// отправляем команду на смену страницы
                         }
-
-                    }
-                    
-
                 }
                 if (command == "toggle")
                 {
-                    while(!s2.writable()){ThisThread::sleep_for(50);}
+                    while(!s2.writable()){ThisThread::sleep_for(5);}
                     int x=P.ToggleHeater(data);
                     if (x==0)
                     {
@@ -147,7 +142,7 @@ void ReadCommands()
                             P.ToggleHeater(data);
                     }
                 }
-                s.printf("%s, data=%d", a,data); //(для отладки)выводим в com порт компьютера полученную команду и данные
+                //s.printf("%s, data=%d", a,data); //(для отладки)выводим в com порт компьютера полученную команду и данные
                 
             }
         }
@@ -253,7 +248,7 @@ void ShowPage2()
     // на нулевой странице нет обновляемых данных
     prevPage = displayPage;
     displayPage=0;
-    while(!s2.writable()){ThisThread::sleep_for(50);} 
+    while(!s2.writable()){ThisThread::sleep_for(5);} 
     s2.printf("ref_stop%c%c%c",255,255,255); // команда сообщает дисплею, что пока не нужно обновлять инф. на дисплее
     s2.printf("page %d%c%c%c",2,255,255,255);// отображаем 2 страницу на дисплее
     int j=graphPos;// узнаем текущее положение слайдера на массиве
