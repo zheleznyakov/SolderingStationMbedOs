@@ -34,8 +34,24 @@ float pid::ReadTemp()
 }
 void pid::SetTemperature(float t_)
 {
+    int dop=0; 
+    if (t_>110) dop=5;
+    if (t_>140) dop+=10;
+    if (t_>160) dop+=10;
+    if (t_>180) dop+=20;
+    if (t_>200) dop+=20;
     requered_temp = t_;
     integral = 0;
+    if (t_>current_temp)
+    {
+        if (t_-current_temp<=15)
+        {setMaxPower(10+dop);Compute(this);return;}
+        if (t_-current_temp<=25)
+        {setMaxPower(20);Compute(this);return;}
+
+    }
+    Compute(this);
+    
 }
 void pid::Compute(void const *arguments)
 {
@@ -52,8 +68,8 @@ void pid::Compute(void const *arguments)
     self->integral+=self->ki*(double)error;
     x+=self->integral;
     if (x>0){
-        if (x<=200) self->power = x;;
-        if (x>200) self->power = 200;
+        if (x<=self->maxPower) self->power = x;;
+        if (x>self->maxPower) self->power = self->maxPower;
     }
     else{
         self->power = 0;
@@ -73,4 +89,14 @@ float pid::temp()
     *spiFlag = 0;
     return current_temp;
     
+}
+void pid::setMaxPower(int x)
+{
+    if (x>=0&&x<=249)
+    {
+        maxPower=x;
+        return;
+    }
+    if (x<0) maxPower = 0;
+
 }

@@ -25,6 +25,7 @@ private:
     PowerControl &pcontrol; // ссылка на фазовый регулятор
     float requered_temp; // требуемая температура
     volatile float current_temp;// текущая температура
+    int maxPower=200;
 
     RtosTimer *tim2; // таймер вызывает функцию Compute для вычисления мощности
     volatile int power; // рассчитанная мощность
@@ -36,6 +37,7 @@ public:
     void SetTemperature(float t_); // задает требуемую температуру
     int Power(); // возвращает рассчитанную мощность
     float temp(); // возвращает текущую температуру из датчика max6675
+    void setMaxPower(int x);
 };
 
 #endif

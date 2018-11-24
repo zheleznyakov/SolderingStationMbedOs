@@ -162,9 +162,9 @@ int main()
     //SetDimming(нагр1, нагр2, нагр3, нагр4, верх)
     //0-мин мощность 249-максимальная при 250 симистор не удерживается открытым
     P.SetDimming(0,0,0,0,0); 
-
+    //reg.setMaxPower(10);
     // уставка температуры при включении питания
-    reg.SetTemperature(15);
+    reg.SetTemperature(0);
     graphPre = 15;
     displayPage = 0;
     SPIflag = false; //spi не занят
