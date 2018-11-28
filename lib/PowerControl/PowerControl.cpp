@@ -47,6 +47,7 @@ void PowerControl::SetDimming(int d1, int d2, int d3, int d4, int dup)
 // DimHeater1UP() обработчик таймера, включающий перывый симистор
 void PowerControl::DimHeater1UP()
 {
+    if (heater[0]==0) return;
             h1_ = 1; // подаем на управлюящий первым симистором выход единицу
             t1.detach();// взводим таймер заново, чтобы через 300мкс снять управляющий сигнал с симистора
             t1.attach_us(callback(this,&PowerControl::DimHeater1Down),5);
@@ -60,6 +61,7 @@ void PowerControl::DimHeater1Down()
 }
 void PowerControl::DimHeater2UP()
 {
+    if (heater[1]==0) return;
             h2_ = 1;
             t2.detach();
             t2.attach_us(callback(this,&PowerControl::DimHeater2Down),5);
@@ -71,6 +73,7 @@ void PowerControl::DimHeater2Down()
 }
 void PowerControl::DimHeater3UP()
 {
+    if (heater[2]==0) return;
             h3_ = 1;
             t3.detach();
             t3.attach_us(callback(this,&PowerControl::DimHeater3Down),5);
@@ -82,6 +85,7 @@ void PowerControl::DimHeater3Down()
 }
 void PowerControl::DimHeater4UP()
 {
+    if (heater[3]==0) return;
             h4_ = 1;
             t4.detach();
             t4.attach_us(callback(this,&PowerControl::DimHeater4Down),5);
@@ -101,6 +105,13 @@ void PowerControl::DimHeater5Down()
 {
     h5_ = 0;
     t5.detach();
+}
+int PowerControl::ToggleHeater(int h)
+{
+    if (h>3||h<0)
+        return 0;
+    heater[h]=!heater[h];
+    return heater[h];
 }
 
 /* PowerControl::setD() инициализирует массив D[Q]=t, где Q- мощность от 0 до 250(0-минимальная; 250-максимальная) t- задержка в микросекундах 
