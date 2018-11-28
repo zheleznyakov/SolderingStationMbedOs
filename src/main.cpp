@@ -15,14 +15,14 @@
 
 int SPIflag;
 Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
-Serial s2(PB_6,PA_10);// tx, rx связь с экраном nextion по uart
+Serial s2(PC_10,PC_11);// tx, rx связь с экраном nextion по uart
 Thread th1; // поток для обработки комманд от дисплея
 // регулятор мощности PowerControl(PinName ZeroCross, PinName h1, PinName h2, PinName h3, PinName h4, PinName hup) 
-PowerControl P(D4,D11,D12,D13,D14,D15);
-SPI spi(PB_15, PB_14, PB_13); // MOSI, MISO, SCLK интерфейс для термопар
-max6675 max_sensor(spi,PB_1); // SPI, CS - chip select первая термопара
+PowerControl P(PC_7,PB_6,PA_7,PA_6,PA_5,PB_9);
+SPI spi(PB_5, PB_4, PB_3); // MOSI, MISO, SCLK интерфейс для термопар
+max6675 max_sensor(spi,PB_10); // SPI, CS - chip select первая термопара
 max6675 max_sensor2(spi,PA_8); // SPI, CS - chip select вторая термопара
-max6675 max_sensor_overheat(spi,PB_10); // SPI, CS - chip select термопара для измерения температуры корпуса
+max6675 max_sensor_overheat(spi,PA_9); // SPI, CS - chip select термопара для измерения температуры корпуса
 
 pid reg(max_sensor,P, 7,100,0, &SPIflag); // ПИД регулятор pid(max6675 obj, powercontrol obj, kp, kd, ki)
 int displayPage, prevPage; // текущая страница, на которой находится дисплей

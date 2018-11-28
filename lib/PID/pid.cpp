@@ -35,9 +35,9 @@ float pid::ReadTemp()
 void pid::SetTemperature(float t_)
 {
     int dop=0; 
-    if (t_>110) dop=5;
-    if (t_>140) dop+=10;
-    if (t_>160) dop+=10;
+    if (t_>110) dop=15;
+    if (t_>140) dop+=20;
+    if (t_>160) dop+=20;
     if (t_>180) dop+=20;
     if (t_>200) dop+=20;
     requered_temp = t_;
@@ -47,7 +47,12 @@ void pid::SetTemperature(float t_)
         if (t_-current_temp<=15)
         {setMaxPower(10+dop);Compute(this);return;}
         if (t_-current_temp<=25)
-        {setMaxPower(20);Compute(this);return;}
+        {setMaxPower(25+dop);Compute(this);return;}
+        if (t_-current_temp<=50)
+        {setMaxPower(60+dop);Compute(this);return;}
+        if (t_-current_temp<=250)
+        {setMaxPower(100+dop);Compute(this);return;}
+        
 
     }
     Compute(this);
