@@ -41,8 +41,8 @@ int graphSold; //значение температуры пайки
 int graphPos; 
 
 void ShowPage2();
-//SDBlockDevice sd(PC_3,PC_2,PC_7,PC_15);
-//FATFileSystem fs("fs");
+SDBlockDevice sd(PB_15,PB_14,PB_13,PC_4);
+FATFileSystem fs("fs");
 
 
 
@@ -180,7 +180,7 @@ int main()
     }
     graphPos=0;
 
-    /*sd.init();
+    sd.init();
     fs.mount(&sd);
 
     FILE* fd = fopen("/fs/hi.txt", "w");
@@ -188,7 +188,7 @@ int main()
     fclose(fd);
 
     sd.deinit();
-    fs.unmount();*/
+    fs.unmount();
 
     
     // запускаем поток для приема команд от дисплея
