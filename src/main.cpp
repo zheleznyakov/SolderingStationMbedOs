@@ -13,6 +13,7 @@
 #include <string>
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
+#include "tinyxml.h"
 
 int SPIflag;
 Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
@@ -132,7 +133,17 @@ int main()
 
     sd.init();
     fs.mount(&sd);
-
+    TiXmlDocument doc("/fs/test.xml");
+    if (!doc.LoadFile(TIXML_ENCODING_UTF8)){s.printf("can not load file test.xml\n");}
+    else {s.printf("test.xml load ok\n");}
+    TiXmlElement *el = doc.RootElement()->FirstChildElement("title");
+    const char *ss = doc.RootElement()->FirstChildElement("title")->GetText();
+    s.printf("%s",ss);
+    el->FirstChild()->SetValue("its work");
+    doc.SaveFile();
+    /*el->SetValue("wow");
+    doc.SaveFile();*/
+    //el->SetText("hello");
     FILE* fd = fopen("/fs/hi.txt", "w");
     fprintf(fd, "hello!");
     fclose(fd);

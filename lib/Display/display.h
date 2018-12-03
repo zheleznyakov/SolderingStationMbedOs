@@ -19,10 +19,10 @@ class Display
     int graphPre; //значение температуры преднагрева
     int graphSold; //значение температуры пайки
     int graphPos; 
+
     public:
         Display(Serial &s);
-        void SetPage(int p);
-        void ShowPage2();
+        void ShowPage2();//страница с графиком
         void ShowPage(int n);
         void Back();
         void ToggleHeater(int heater,bool value);

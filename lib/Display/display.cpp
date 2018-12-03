@@ -5,8 +5,6 @@ Display::Display(Serial &s):com(s)
     prevPage = 0;
     graphPre=15;
 }
-void Display::SetPage(int p)
-{displayPage = p;}
 
 void Display::ShowPage2()
 {
