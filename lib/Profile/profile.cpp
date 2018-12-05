@@ -5,6 +5,7 @@ Profiles::Profiles()
     fileLoaded = false;
     profileId=-1;
     PointsCount = 0;
+    points = NULL;
 }
 int Profiles::init()
 {
@@ -36,6 +37,29 @@ int Profiles::SelectProfile(int id)
         if (x==-1) return 0;
         const char *ss= el->Attribute("title");
         title.append(ss);
+
+        ProfilePoint *p;
+        
+        p = new ProfilePoint();
+        points = p;
+        for (TiXmlElement *y= el->FirstChildElement("point");y;y=y->NextSiblingElement("point"))
+        {
+            if (PointsCount==0)
+            {
+                p->type =y->Attribute("type");
+                y->QueryIntAttribute("value",&p->value);
+            }
+            else{
+
+                p->next = new ProfilePoint();
+                p->next->previous = p;
+                p=p->next;
+
+                p->type =y->Attribute("type");
+                y->QueryIntAttribute("value",&p->value);
+            }
+            PointsCount++;
+        }
         profileId=id;
         return 1;
     }
@@ -43,7 +67,22 @@ int Profiles::SelectProfile(int id)
     
 
 }
+void Profiles::ClearPoints(ProfilePoint *x)
+{
+    if (x==NULL) return;
+    ClearPoints(x->next);
+    delete x;
+    x=NULL;
+}
 string Profiles::GetProfileName()
 {
     return title;
+}
+int Profiles::GetCountOfPoints()
+{
+    return PointsCount;
+}
+ProfilePoint* Profiles::GetPoints()
+{
+    return points;
 }

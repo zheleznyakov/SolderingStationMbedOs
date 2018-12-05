@@ -139,7 +139,14 @@ int main()
     {s.printf("Profiles file loaded\n\r");}
     pr.SelectProfile(0);
     s.printf("ProfileName = %s\n\r",pr.GetProfileName().c_str());
+    s.printf("Count of points = %d\n\r",pr.GetCountOfPoints());
+    ProfilePoint* points = pr.GetPoints();
+    while(points)
+    {
+        s.printf("Point type = %s; value=%d\n\r",points->type.c_str(),points->value);
+        points = points->next;
 
+    }
     //FILE* fd = fopen("/fs/hi.txt", "w");
     //fprintf(fd, "hello!");
     //fclose(fd);
