@@ -1,9 +1,37 @@
+/*
+* класс Profiles реализует считывание нужного профиля из profiles.xml и сохранение изменений внесенных в профиль
+
+Пример файла с двумя профилями пайки
+<?xml version="1.0" encoding="UTF-8" ?>
+<profiles>
+	<profile id="0" title="down 140 up 200">
+		<point type="down" value="100"></point>
+		<point type="wait" value="30"></point>
+		<point type="down" value="140"></point>
+		<point type="wait" value="40"></point>
+		<point type="up" value="200"></point>
+	</profile>
+	<profile id="1" title="preheat 100">
+			<point type="down" value="100"></point>
+	</profile>
+</profiles>
+*/
 #ifndef PROFILE_H
 #define PROFILE_H
 #include "mbed.h"
 #include "tinyxml.h"
 #include <string>
 
+/*
+* ProfilePoint - список, который содержит шаги профиля пайки. type принимает значения up,down,wait
+* up - использовать верхний нагреватель
+* down - использовать нижний нагреватель
+* wait - ожидать
+* value - значение, означающее либо температуру в градусах цельсия для шага up или down
+* или задержку в секундах для шага wait
+* next - указатель на следующий шаг
+* previous - указатель на предыдущий шаг
+*/
 struct ProfilePoint
 {
     string type;
@@ -12,24 +40,25 @@ struct ProfilePoint
     ProfilePoint *previous=NULL;
 };
 
+
 class Profiles
 {
-    ProfilePoint *points;
-    int PointsCount;
-    bool fileLoaded;
-    TiXmlDocument doc;
-    string title;
-    int profileId;
+    ProfilePoint *points; // список с этапами пайки
+    int PointsCount; // количество этапов пайки
+    bool fileLoaded; // true, если файл с профилями загружен удачно
+    TiXmlDocument doc;// xml файл с профилями
+    string title; // название выбранного профиля
+    int profileId;// id выбранного профиля -1, если не выбран ни один профиль
 
-    void ClearPoints(ProfilePoint *x);
+    void ClearPoints(ProfilePoint *x);// удаляет из памяти список с этапами пайки
 
     public:
     Profiles();
-    int init();
-    int SelectProfile(int id);
-    string GetProfileName();
-    int GetCountOfPoints();
-    ProfilePoint *GetPoints();
+    int init(); // загружает profiles.xml с флеш карты 1-удачно, 0 - неудачно
+    int SelectProfile(int id); //сделать текущим профиль с номером id
+    string GetProfileName(); //возвращает название выбранного профиля
+    int GetCountOfPoints();// получить количество этапов пайки
+    ProfilePoint *GetPoints();// получить список этапов пайки
 
 };
 #endif

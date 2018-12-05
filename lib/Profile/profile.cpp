@@ -1,3 +1,19 @@
+/*
+Пример xml файла с двумя профилями пайки
+<?xml version="1.0" encoding="UTF-8" ?>
+<profiles>
+	<profile id="0" title="down 140 up 200">
+		<point type="down" value="100"></point>
+		<point type="wait" value="30"></point>
+		<point type="down" value="140"></point>
+		<point type="wait" value="40"></point>
+		<point type="up" value="200"></point>
+	</profile>
+	<profile id="1" title="preheat 100">
+			<point type="down" value="100"></point>
+	</profile>
+</profiles>
+*/
 #include "profile.h"
 
 Profiles::Profiles()
@@ -7,6 +23,7 @@ Profiles::Profiles()
     PointsCount = 0;
     points = NULL;
 }
+
 int Profiles::init()
 {
     if(!doc.LoadFile("/fs/profiles.xml"))
@@ -28,15 +45,17 @@ int Profiles::SelectProfile(int id)
     {
         TiXmlElement *el = doc.RootElement()->FirstChildElement("profile"); //находим первый профиль
         if (!el) return 0;
-        do {
+        do { // ищем нужный профиль, сравнивая id
         
             if(!el->QueryIntAttribute("id", &x)==TIXML_SUCCESS) return 0;
             if (x==id) break;
             el = el->NextSiblingElement("profile");
         } while (el);
-        if (x==-1) return 0;
+        if (x==-1) return 0; //профиль с нужным id не найден
         const char *ss= el->Attribute("title");
-        title.append(ss);
+        title.append(ss); 
+
+        //Дальше будем считывать точки(этапы) профиля в список points
 
         ProfilePoint *p;
         
@@ -67,6 +86,7 @@ int Profiles::SelectProfile(int id)
     
 
 }
+// ClearPoints - рекурсивная функция, удаляющая список с этапами пайки из памяти
 void Profiles::ClearPoints(ProfilePoint *x)
 {
     if (x==NULL) return;
