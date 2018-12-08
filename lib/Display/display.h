@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 #include "mbed.h"
+#include "profile.h"
 class Display
 {
     Serial &com;
@@ -29,6 +30,9 @@ class Display
         void Init(int temp_down,int temp_up);
         void ShowInf(int temp_down,int temp_up,int temp_case);
         void SetPreheatTemp(int t);
+        int GetCurrentPageNumber();
+        void ShowProfilesListPage(Profile_Id_Title *all_profiles);
+
 
 };
 

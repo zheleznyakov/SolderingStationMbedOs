@@ -21,6 +21,7 @@ Profiles::Profiles()
     fileLoaded = false;
     profileId=-1;
     PointsCount = 0;
+    ProfilesCount =0;
     points = NULL;
 }
 
@@ -33,6 +34,38 @@ int Profiles::init()
     fileLoaded = true;
     return 1;
 
+}
+int Profiles::LoadProfiles()
+{
+    if (fileLoaded)
+    {
+        TiXmlElement *root = doc.RootElement();
+        Profile_Id_Title *p;
+        p= new Profile_Id_Title();
+        all_profiles = p;
+        for (TiXmlElement *y= root->FirstChildElement("profile");y;y=y->NextSiblingElement("profile"))
+        {
+            if (ProfilesCount==0)
+            {
+                y->QueryIntAttribute("id",&p->id);
+                p->title.append(y->Attribute("title"));
+                
+            }
+            else{
+                p->next = new Profile_Id_Title();
+                p->next->previous = p;
+                p=p->next;
+                y->QueryIntAttribute("id",&p->id);
+                p->title.append(y->Attribute("title"));
+
+            }
+            ProfilesCount++;
+
+        }
+        if (ProfilesCount>0) return 1;
+
+    }
+    return 0;
 }
 /*
 * SelectProfile(int id) выбирает профиль из xml файла, возвращает 1 в случае удачи, 0 - неудача
@@ -105,4 +138,8 @@ int Profiles::GetCountOfPoints()
 ProfilePoint* Profiles::GetPoints()
 {
     return points;
+}
+Profile_Id_Title* Profiles::GetProfiles()
+{
+    return all_profiles;
 }

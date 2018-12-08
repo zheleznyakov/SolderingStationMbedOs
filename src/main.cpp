@@ -134,9 +134,12 @@ int main()
 
     sd.init();
     fs.mount(&sd);
+
     Profiles pr;
     if (pr.init())
     {s.printf("Profiles file loaded\n\r");}
+    if (pr.LoadProfiles())
+    {s.printf("Profiles loaded\n\r");}
     pr.SelectProfile(0);
     s.printf("ProfileName = %s\n\r",pr.GetProfileName().c_str());
     s.printf("Count of points = %d\n\r",pr.GetCountOfPoints());
@@ -147,6 +150,8 @@ int main()
         points = points->next;
 
     }
+    
+
     //FILE* fd = fopen("/fs/hi.txt", "w");
     //fprintf(fd, "hello!");
     //fclose(fd);
@@ -171,6 +176,11 @@ int main()
         ThisThread::sleep_for(10);
         tempc = max_sensor_overheat.read_temp();
         SPIflag = 0;
+        // отображаем необходимую информацию на экране
+        if (disp.GetCurrentPageNumber()==5)
+        {
+            disp.ShowProfilesListPage(pr.GetProfiles());
+        }
         disp.ShowInf(temp,tempu,tempc);
     }
 }

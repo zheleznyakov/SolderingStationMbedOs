@@ -40,11 +40,22 @@ struct ProfilePoint
     ProfilePoint *previous=NULL;
 };
 
+// Список всех профилей
+struct Profile_Id_Title
+{
+    int id;
+    string title;
+    Profile_Id_Title *next=NULL;
+    Profile_Id_Title *previous=NULL;
+};
+
 
 class Profiles
 {
     ProfilePoint *points; // список с этапами пайки
+    Profile_Id_Title *all_profiles;
     int PointsCount; // количество этапов пайки
+    int ProfilesCount;
     bool fileLoaded; // true, если файл с профилями загружен удачно
     TiXmlDocument doc;// xml файл с профилями
     string title; // название выбранного профиля
@@ -55,10 +66,12 @@ class Profiles
     public:
     Profiles();
     int init(); // загружает profiles.xml с флеш карты 1-удачно, 0 - неудачно
+    int LoadProfiles();//загружажет профили в список Profile_Id_Title;
     int SelectProfile(int id); //сделать текущим профиль с номером id
     string GetProfileName(); //возвращает название выбранного профиля
     int GetCountOfPoints();// получить количество этапов пайки
     ProfilePoint *GetPoints();// получить список этапов пайки
+    Profile_Id_Title *GetProfiles();// получить список профилей
 
 };
 #endif

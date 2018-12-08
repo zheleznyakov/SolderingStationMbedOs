@@ -35,12 +35,11 @@ void Display::ShowPage(int n)
     if (n==2)
     {
         ShowPage2();
+        return;
     }
-    else{
-        while(!com.writable()){ThisThread::sleep_for(5);}
-        com.printf("page %d%c%c%c",n,255,255,255);// отправляем команду на смену страницы
-
-    }
+    
+    while(!com.writable()){ThisThread::sleep_for(5);}
+    com.printf("page %d%c%c%c",n,255,255,255);// отправляем команду на смену страницы
 }
 void Display::Back()
 {
@@ -97,8 +96,22 @@ void Display::ShowInf(int temp_down,int temp_up,int temp_case)
         com.printf("tempzup.val=%d%c%c%c",temp_up,255,255,255);
         com.printf("tempzcase.val=%d%c%c%c",temp_case,255,255,255);
     }
+
 }
 void Display::SetPreheatTemp(int t)
 {
     graphPre = t;
+}
+int Display::GetCurrentPageNumber()
+{
+    return displayPage;
+}
+void Display::ShowProfilesListPage(Profile_Id_Title *all_profiles)
+{
+    while(all_profiles)
+    {
+        com.printf("profile%d.txt=\"%s\"%c%c%c",all_profiles->id,all_profiles->title.c_str(),255,255,255);
+        all_profiles = all_profiles->next;
+
+    }
 }
