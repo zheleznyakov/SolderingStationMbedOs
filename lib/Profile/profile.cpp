@@ -37,6 +37,7 @@ int Profiles::init()
 }
 int Profiles::LoadProfiles()
 {
+    ClearProfiles(all_profiles);
     if (fileLoaded)
     {
         TiXmlElement *root = doc.RootElement();
@@ -73,6 +74,8 @@ int Profiles::LoadProfiles()
 */
 int Profiles::SelectProfile(int id)
 {
+    ClearPoints (points);
+    title="";
     int x=-1;
     if (fileLoaded) 
     {
@@ -127,6 +130,13 @@ void Profiles::ClearPoints(ProfilePoint *x)
     delete x;
     x=NULL;
 }
+void Profiles::ClearProfiles(Profile_Id_Title *x)
+{
+    if (x==NULL) return;
+    ClearProfiles(x->next);
+    delete x;
+    x=NULL;
+}
 string Profiles::GetProfileName()
 {
     return title;
@@ -142,4 +152,24 @@ ProfilePoint* Profiles::GetPoints()
 Profile_Id_Title* Profiles::GetProfiles()
 {
     return all_profiles;
+}
+bool Profiles::SetCurrentProfileName(string str)
+{
+    int x;
+    if (profileId==-1) return 0;
+    if (fileLoaded)
+    {
+        for (TiXmlElement *y= doc.RootElement()->FirstChildElement("profile");y;y=y->NextSiblingElement("profile"))
+        {
+            y->QueryIntAttribute("id",&x);
+            if (x==profileId)
+            {
+                y->SetAttribute("title",str.c_str());
+                doc.SaveFile();
+                LoadProfiles();
+                return 1;
+            }
+        }
+    }
+    return 0;
 }

@@ -62,7 +62,7 @@ class Profiles
     int profileId;// id выбранного профиля -1, если не выбран ни один профиль
 
     void ClearPoints(ProfilePoint *x);// удаляет из памяти список с этапами пайки
-
+    void ClearProfiles(Profile_Id_Title *x); // удаляет из памяти список с профилями
     public:
     Profiles();
     int init(); // загружает profiles.xml с флеш карты 1-удачно, 0 - неудачно
@@ -72,6 +72,8 @@ class Profiles
     int GetCountOfPoints();// получить количество этапов пайки
     ProfilePoint *GetPoints();// получить список этапов пайки
     Profile_Id_Title *GetProfiles();// получить список профилей
+
+    bool SetCurrentProfileName(string str);//изменяет имя текущего профиля
 
 };
 #endif

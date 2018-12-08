@@ -32,6 +32,7 @@ pid reg(max_sensor,P, 7,100,0, &SPIflag); // ПИД регулятор pid(max66
 
 SDBlockDevice sd(PB_15,PB_14,PB_13,PC_4);//mosi,miso,sclk,cs
 FATFileSystem fs("fs");
+Profiles pr;
 
 
 
@@ -46,6 +47,7 @@ void ReadCommands()
     char a[30]; // буфер для приема команд
     string str,command; 
     int data = 0;
+    string datastr;
     int c = 0; // c>0, если пришли данные, требующие обработки. Если c=0, то пришли ненужные нам данные(служебная информация)
 
     while(1) {
@@ -60,7 +62,12 @@ void ReadCommands()
             }
             else 
             {
-                s2.scanf("%s",a); // считываем данные в буффер а
+                
+                //s2.gets(a,2);
+                s2.gets(a,29);
+                //s2.scanf("%s",a); // считываем данные в буффер а
+                
+                s.printf("mas[a]=%s\n\r",a);
                 c++;
             }
 
@@ -75,7 +82,23 @@ void ReadCommands()
             if (pos!=-1)
             {
                 command = str.substr(0,pos); 
-                data = atoi(a+pos+1);
+                if (command=="name")
+                {
+                    char *t;
+                    t=a+pos+1;
+                    datastr.append(t);
+                    sd.init();
+                    fs.mount(&sd);
+
+                    pr.SetCurrentProfileName(datastr);
+                    sd.deinit();
+                    fs.unmount();
+                    s.printf("ChangeName=%s\n\r",datastr.c_str());
+                    datastr="";
+                }
+                else{
+                    data = atoi(a+pos+1);
+                }
 
                 if (command=="sd") //sd - set down. Команда устанавливает температуру для нагрева нижним нагревателем
                 {
@@ -100,6 +123,15 @@ void ReadCommands()
                     
                     int x=P.ToggleHeater(data);
                     disp.ToggleHeater(data, x);
+                }
+                if (command == "setprofile")
+                {
+                    s.printf("Set profile %d\n\r",data);
+                    disp.ShowPage(6);
+                    pr.SelectProfile(data);
+                    disp.ShowSelectedProfile(pr.GetPoints(),pr.GetProfileName());
+                    
+                    
                 }
                
             }
@@ -135,7 +167,7 @@ int main()
     sd.init();
     fs.mount(&sd);
 
-    Profiles pr;
+    
     if (pr.init())
     {s.printf("Profiles file loaded\n\r");}
     if (pr.LoadProfiles())

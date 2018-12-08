@@ -32,6 +32,7 @@ class Display
         void SetPreheatTemp(int t);
         int GetCurrentPageNumber();
         void ShowProfilesListPage(Profile_Id_Title *all_profiles);
+        void ShowSelectedProfile(ProfilePoint *points, string ProfileName);
 
 
 };

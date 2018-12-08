@@ -110,8 +110,39 @@ void Display::ShowProfilesListPage(Profile_Id_Title *all_profiles)
 {
     while(all_profiles)
     {
+        while(!com.writable()){ThisThread::sleep_for(5);}
         com.printf("profile%d.txt=\"%s\"%c%c%c",all_profiles->id,all_profiles->title.c_str(),255,255,255);
         all_profiles = all_profiles->next;
 
     }
+}
+void Display::ShowSelectedProfile(ProfilePoint *points, string ProfileName)
+{
+    int x=-1;
+    while(points)
+    {
+        if (points->type=="up")
+        {
+            x++;
+            while(!com.writable()){ThisThread::sleep_for(5);}
+            com.printf("point%d.txt=\"Heat UP %d degree\"%c%c%c",x,points->value,255,255,255);
+        }
+        if (points->type=="down")
+        {
+            x++;
+            while(!com.writable()){ThisThread::sleep_for(5);}
+            com.printf("point%d.txt=\"Heat down %d degree\"%c%c%c",x,points->value,255,255,255);
+        }
+        if (points->type=="wait")
+        {
+            x++;
+            while(!com.writable()){ThisThread::sleep_for(5);}
+            com.printf("point%d.txt=\"Wait %d seconds\"%c%c%c",x,points->value,255,255,255);
+        }
+        points = points->next;
+
+    }
+    while(!com.writable()){ThisThread::sleep_for(5);}
+    com.printf("profilename.txt=\"%s\"%c%c%c",ProfileName.c_str(),255,255,255);
+    
 }
