@@ -108,10 +108,15 @@ int Display::GetCurrentPageNumber()
 }
 void Display::ShowProfilesListPage(Profile_Id_Title *all_profiles)
 {
+    int x=0;
     while(all_profiles)
     {
         while(!com.writable()){ThisThread::sleep_for(5);}
-        com.printf("profile%d.txt=\"%s\"%c%c%c",all_profiles->id,all_profiles->title.c_str(),255,255,255);
+        if (x<=3)
+            com.printf("profilesList.profile%d.txt=\"%s\"%c%c%c",all_profiles->id,all_profiles->title.c_str(),255,255,255);
+        else
+            com.printf("profilesList2.profile%d.txt=\"%s\"%c%c%c",all_profiles->id,all_profiles->title.c_str(),255,255,255);
+        x++;
         all_profiles = all_profiles->next;
 
     }
@@ -125,19 +130,25 @@ void Display::ShowSelectedProfile(ProfilePoint *points, string ProfileName)
         {
             x++;
             while(!com.writable()){ThisThread::sleep_for(5);}
-            com.printf("point%d.txt=\"Heat UP %d degree\"%c%c%c",x,points->value,255,255,255);
+            com.printf("point%d.txt=\"UP%ddeg\"%c%c%c",x,points->value,255,255,255);
         }
         if (points->type=="down")
         {
             x++;
             while(!com.writable()){ThisThread::sleep_for(5);}
-            com.printf("point%d.txt=\"Heat down %d degree\"%c%c%c",x,points->value,255,255,255);
+            com.printf("point%d.txt=\"Down%ddeg\"%c%c%c",x,points->value,255,255,255);
         }
         if (points->type=="wait")
         {
             x++;
             while(!com.writable()){ThisThread::sleep_for(5);}
-            com.printf("point%d.txt=\"Wait %d seconds\"%c%c%c",x,points->value,255,255,255);
+            com.printf("point%d.txt=\"Wait%ds\"%c%c%c",x,points->value,255,255,255);
+        }
+        if (points->type=="none")
+        {
+            x++;
+            while(!com.writable()){ThisThread::sleep_for(5);}
+            com.printf("point%d.txt=\"none\"%c%c%c",x,255,255,255);
         }
         points = points->next;
 
