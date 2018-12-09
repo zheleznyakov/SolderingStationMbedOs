@@ -46,7 +46,7 @@ Profiles pr;
 void ReadCommands()
 {
     
-    char a[30]; // буфер для приема команд
+    char a[40]; // буфер для приема команд
     string str,command; 
     int data = 0;
     string datastr;
@@ -66,7 +66,7 @@ void ReadCommands()
             {
                 
                 //s2.gets(a,2);
-                s2.gets(a,29);
+                s2.gets(a,39);
                 //s2.scanf("%s",a); // считываем данные в буффер а
                 
                 s.printf("mas[a]=%s\n\r",a);
@@ -136,6 +136,38 @@ void ReadCommands()
                     disp.ShowSelectedProfile(pr.GetPoints(),pr.GetProfileName());
                     
                     
+                }
+                if (command == "setpoint")
+                {
+                    ProfilePoint *selectedPoint = pr.SelectPoint(data);
+
+                    if (selectedPoint)
+                    {
+                        disp.ShowPointPage(selectedPoint->type,selectedPoint->value);
+                    }
+                    
+                }
+                if (command == "savepoint")
+                {
+                    ProfilePoint *selectedPoint = pr.GetSelectedPoint();
+                    selectedPoint->value = data;
+                    sd.init();
+                    fs.mount(&sd);
+                    pr.SaveSelectedPoint();
+                    sd.deinit();
+                    fs.unmount();
+                    disp.ShowPage(6);
+                    disp.ShowSelectedProfile(pr.GetPoints(),pr.GetProfileName());
+                }
+                if (command == "check")
+                {
+                    pr.Check(data);
+                    ProfilePoint *selectedPoint = pr.GetSelectedPoint();
+
+                    if (selectedPoint)
+                    {
+                        disp.ShowPointPage(selectedPoint->type,selectedPoint->value);
+                    }
                 }
                
             }

@@ -30,7 +30,11 @@ void Display::ShowPage2()
 }
 void Display::ShowPage(int n)
 {
-    prevPage = displayPage; // запоминаем текущую страницу
+    if (n!=9)
+    {
+        if (!(displayPage==9&&n==6))
+        prevPage = displayPage; // запоминаем текущую страницу
+    }
     displayPage = n; // запоминаем страницу на которую будем переходить
     if (n==2)
     {
@@ -163,4 +167,42 @@ void Display::ClearPointsPage()
     {
         com.printf("prof_props.point%d.txt=\"none\"%c%c%c",i,255,255,255);
     }
+}
+void Display::ShowPointPage(string type,int val)
+{
+    ShowPage(9);
+    if (type=="up")
+    {
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("pointsSets.check0.val=1%c%c%c",255,255,255);
+        com.printf("pointsSets.check1.val=0%c%c%c",255,255,255);
+        com.printf("pointsSets.check2.val=0%c%c%c",255,255,255);
+        com.printf("pointsSets.check3.val=0%c%c%c",255,255,255);
+    }
+    if (type=="down")
+    {
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("pointsSets.check0.val=0%c%c%c",255,255,255);
+        com.printf("pointsSets.check1.val=1%c%c%c",255,255,255);
+        com.printf("pointsSets.check2.val=0%c%c%c",255,255,255);
+        com.printf("pointsSets.check3.val=0%c%c%c",255,255,255);
+    }
+    if (type=="wait")
+    {
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("pointsSets.check0.val=0%c%c%c",255,255,255);
+        com.printf("pointsSets.check1.val=0%c%c%c",255,255,255);
+        com.printf("pointsSets.check2.val=1%c%c%c",255,255,255);
+        com.printf("pointsSets.check3.val=0%c%c%c",255,255,255);
+    }
+    if (type=="none")
+    {
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("pointsSets.check0.val=0%c%c%c",255,255,255);
+        com.printf("pointsSets.check1.val=0%c%c%c",255,255,255);
+        com.printf("pointsSets.check2.val=0%c%c%c",255,255,255);
+        com.printf("pointsSets.check3.val=1%c%c%c",255,255,255);
+    }
+    com.printf("pointsSets.point_value.val=%d%c%c%c",val,255,255,255);
+    
 }

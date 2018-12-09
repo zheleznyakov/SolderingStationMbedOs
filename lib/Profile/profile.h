@@ -52,7 +52,11 @@ struct Profile_Id_Title
 
 class Profiles
 {
+    TiXmlElement *currentProfile,*currentPoint;
+
     ProfilePoint *points; // список с этапами пайки
+    ProfilePoint *selectedPoint;
+    int selectedPointId;
     Profile_Id_Title *all_profiles;
     int PointsCount; // количество этапов пайки
     int ProfilesCount;
@@ -68,15 +72,20 @@ class Profiles
     Profiles();
     int init(); // загружает profiles.xml с флеш карты 1-удачно, 0 - неудачно
     int LoadProfiles();//загружажет профили в список Profile_Id_Title;
+    ProfilePoint* SelectPoint(int i);
     int SelectProfile(int id); //сделать текущим профиль с номером id
     string GetProfileName(); //возвращает название выбранного профиля
     int GetCountOfPoints();// получить количество этапов пайки
     ProfilePoint *GetPoints();// получить список этапов пайки
     Profile_Id_Title *GetProfiles();// получить список профилей
+    ProfilePoint *GetSelectedPoint();
 
     bool SetCurrentProfileName(string str);//изменяет имя текущего профиля
     int GetCurrentProfileID();
     int GetProfilesCount();
+    int SaveSelectedPoint();
+
+    void Check(int val);
 
 };
 #endif

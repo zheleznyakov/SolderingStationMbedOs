@@ -23,6 +23,10 @@ Profiles::Profiles()
     PointsCount = 0;
     ProfilesCount =0;
     points = NULL;
+    selectedPoint = NULL;
+    selectedPointId = -1;
+    currentPoint = NULL;
+    currentProfile = NULL;
 }
 
 int Profiles::init()
@@ -76,6 +80,7 @@ int Profiles::LoadProfiles()
 int Profiles::SelectProfile(int id)
 {
     ClearPoints (points);
+    PointsCount = 0;
     title="";
     int x=-1;
     if (fileLoaded) 
@@ -89,6 +94,7 @@ int Profiles::SelectProfile(int id)
             el = el->NextSiblingElement("profile");
         } while (el);
         if (x==-1) return 0; //профиль с нужным id не найден
+        currentProfile = el;
         const char *ss= el->Attribute("title");
         title.append(ss); 
 
@@ -156,6 +162,14 @@ Profile_Id_Title* Profiles::GetProfiles()
 }
 bool Profiles::SetCurrentProfileName(string str)
 {
+    if (!currentProfile) return 0;
+    if (str.size()>2)
+        str.resize(str.size()-2);
+    currentProfile->SetAttribute("title",str.c_str());
+    doc.SaveFile();
+    LoadProfiles();
+    return 1;
+    /*
     int x;
     if (profileId==-1) return 0;
     if (fileLoaded)
@@ -175,7 +189,7 @@ bool Profiles::SetCurrentProfileName(string str)
             }
         }
     }
-    return 0;
+    return 0;*/
 }
 int Profiles::GetCurrentProfileID()
 {
@@ -184,4 +198,66 @@ int Profiles::GetCurrentProfileID()
 int Profiles::GetProfilesCount()
 {
     return ProfilesCount;
+}
+ProfilePoint* Profiles::SelectPoint(int i)
+{
+    selectedPoint = NULL;
+    selectedPointId = -1;
+    currentPoint = NULL;
+    int x=0;
+    ProfilePoint *n = points;
+    while(n)
+    {
+        if (x==i)
+        {
+            selectedPoint = n;
+            selectedPointId = x;
+            // ищем точку в xml
+            int ind=0;
+            for (TiXmlElement *y= currentProfile->FirstChildElement("point");y;y=y->NextSiblingElement("point"))
+            {
+                if (ind==i)
+                {
+                    currentPoint = y;
+                    //break;
+                }
+                ind++;
+            }
+            // всё ищем точку
+            return selectedPoint;
+        }
+        
+        x++;
+        n=n->next;
+    }
+    return NULL;
+}
+ProfilePoint* Profiles::GetSelectedPoint()
+{
+    return selectedPoint;
+}
+int Profiles::SaveSelectedPoint()
+{
+    currentPoint->SetAttribute("type",selectedPoint->type.c_str());
+    currentPoint->SetAttribute("value",selectedPoint->value);
+    doc.SaveFile();
+}
+void Profiles::Check(int val)
+{
+    if (val == 0)
+    {
+        selectedPoint->type = "up";
+    }
+    if (val == 1)
+    {
+        selectedPoint->type = "down";
+    }
+    if (val == 2)
+    {
+        selectedPoint->type = "wait";
+    }
+    if (val == 3)
+    {
+        selectedPoint->type = "none";
+    }
 }
