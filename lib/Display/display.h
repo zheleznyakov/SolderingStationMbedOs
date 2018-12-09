@@ -33,6 +33,7 @@ class Display
         int GetCurrentPageNumber();
         void ShowProfilesListPage(Profile_Id_Title *all_profiles);
         void ShowSelectedProfile(ProfilePoint *points, string ProfileName);
+        void ClearPointsPage();
 
 
 };

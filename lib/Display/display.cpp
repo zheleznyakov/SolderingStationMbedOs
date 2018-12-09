@@ -146,3 +146,10 @@ void Display::ShowSelectedProfile(ProfilePoint *points, string ProfileName)
     com.printf("profilename.txt=\"%s\"%c%c%c",ProfileName.c_str(),255,255,255);
     
 }
+void Display::ClearPointsPage()
+{
+    for (int i=0;i<=5;i++)
+    {
+        com.printf("prof_props.point%d.txt=\"none\"%c%c%c",i,255,255,255);
+    }
+}

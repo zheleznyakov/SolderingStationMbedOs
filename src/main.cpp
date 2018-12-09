@@ -127,6 +127,7 @@ void ReadCommands()
                 if (command == "setprofile")
                 {
                     s.printf("Set profile %d\n\r",data);
+                    disp.ClearPointsPage();
                     disp.ShowPage(6);
                     pr.SelectProfile(data);
                     disp.ShowSelectedProfile(pr.GetPoints(),pr.GetProfileName());
