@@ -15,6 +15,7 @@
 #include "FATFileSystem.h"
 #include "tinyxml.h"
 #include "profile.h"
+using std::string;
 
 int SPIflag;
 Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
@@ -33,6 +34,7 @@ pid reg(max_sensor,P, 7,100,0, &SPIflag); // ПИД регулятор pid(max66
 SDBlockDevice sd(PB_15,PB_14,PB_13,PC_4);//mosi,miso,sclk,cs
 FATFileSystem fs("fs");
 Profiles pr;
+
 
 
 
@@ -93,7 +95,8 @@ void ReadCommands()
                     pr.SetCurrentProfileName(datastr);
                     sd.deinit();
                     fs.unmount();
-                    s.printf("ChangeName=%s\n\r",datastr.c_str());
+                    s.printf("ChangeName=%s\n",datastr.c_str());
+                    s.printf("ProfilesCount=%d\n",pr.GetProfilesCount());
                     datastr="";
                 }
                 else{
@@ -147,7 +150,6 @@ void ReadCommands()
 
 int main()
 {
-
     s.baud(115200); // связь с комьютером
     s2.baud(115200);// связь с nextion
     //SetDimming(нагр1, нагр2, нагр3, нагр4, верх)
@@ -210,7 +212,7 @@ int main()
         tempc = max_sensor_overheat.read_temp();
         SPIflag = 0;
         // отображаем необходимую информацию на экране
-        if (disp.GetCurrentPageNumber()==5)
+        if (disp.GetCurrentPageNumber()==5||disp.GetCurrentPageNumber()==7)
         {
             disp.ShowProfilesListPage(pr.GetProfiles());
         }

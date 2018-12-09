@@ -38,6 +38,7 @@ int Profiles::init()
 int Profiles::LoadProfiles()
 {
     ClearProfiles(all_profiles);
+    ProfilesCount = 0;
     if (fileLoaded)
     {
         TiXmlElement *root = doc.RootElement();
@@ -164,7 +165,10 @@ bool Profiles::SetCurrentProfileName(string str)
             y->QueryIntAttribute("id",&x);
             if (x==profileId)
             {
+                if (str.size()>2)
+                    str.resize(str.size()-2);
                 y->SetAttribute("title",str.c_str());
+                
                 doc.SaveFile();
                 LoadProfiles();
                 return 1;
@@ -172,4 +176,12 @@ bool Profiles::SetCurrentProfileName(string str)
         }
     }
     return 0;
+}
+int Profiles::GetCurrentProfileID()
+{
+    return profileId;
+}
+int Profiles::GetProfilesCount()
+{
+    return ProfilesCount;
 }
