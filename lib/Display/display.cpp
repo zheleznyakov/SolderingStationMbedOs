@@ -95,6 +95,7 @@ void Display::ShowInf(int temp_down,int temp_up,int temp_case)
         // отправляем точку на график
         com.printf("add 1,0,%d%c%c%c",temp_down,255,255,255);
         com.printf("add 1,1,%d%c%c%c",temp_up,255,255,255);
+        com.printf("add 1,3,%d%c%c%c",graphPre,255,255,255); //зеленая линия
         // tempz - значение текущей температуры, отображаемое на странице Nextion с графиком
         com.printf("tempz.val=%d%c%c%c",temp_down,255,255,255);
         com.printf("tempzup.val=%d%c%c%c",temp_up,255,255,255);
@@ -205,4 +206,30 @@ void Display::ShowPointPage(string type,int val)
     }
     com.printf("pointsSets.point_value.val=%d%c%c%c",val,255,255,255);
     
+}
+void Display::ShowCurrentPoint(string profileName,string type, int val)
+{
+    while(!com.writable()){ThisThread::sleep_for(5);}
+    com.printf("page2.pname.txt=\" %s\"%c%c%c",profileName.c_str(),255,255,255);
+
+    if (type=="up")
+    {
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("page2.operation.txt=\" Heat by UP to %d degrees\"%c%c%c",val,255,255,255);
+    }
+    if (type=="down")
+    {
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("page2.operation.txt=\" Heat by Down to %d degrees\"%c%c%c",val,255,255,255);
+    }
+    if (type=="wait")
+    {
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("page2.operation.txt=\" Wait %d seconds\"%c%c%c",val,255,255,255);
+    }
+    if (type=="none")
+    {
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("page2.operation.txt=\" Profile finished\"%c%c%c",255,255,255);
+    }
 }

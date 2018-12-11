@@ -35,6 +35,7 @@ class Display
         void ShowSelectedProfile(ProfilePoint *points, string ProfileName);
         void ClearPointsPage();
         void ShowPointPage(string type,int val);
+        void ShowCurrentPoint(string profileName,string type, int val);
 
 
 };

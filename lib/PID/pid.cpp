@@ -35,7 +35,8 @@ float pid::ReadTemp()
 void pid::SetTemperature(float t_)
 {
     int dop=0; 
-    if (t_>110) dop=15;
+    if (t_>80) dop = 15;
+    if (t_>110) dop=25;
     if (t_>140) dop+=20;
     if (t_>160) dop+=20;
     if (t_>180) dop+=20;

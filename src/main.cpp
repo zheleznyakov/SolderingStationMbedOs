@@ -22,6 +22,7 @@ Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
 Serial s2(PC_10,PC_11);// tx, rx связь с экраном nextion по uart
 Display disp(s2);
 Thread th1; // поток для обработки комманд от дисплея
+Thread soldering;
 // регулятор мощности PowerControl(PinName ZeroCross, PinName h1, PinName h2, PinName h3, PinName h4, PinName hup) 
 PowerControl P(PC_7,PB_6,PA_7,PA_6,PA_5,PB_9); //zero cross, h1,h2,h3,h4,hup
 SPI spi(PB_5, PB_4, PB_3); // MOSI, MISO, SCLK интерфейс для термопар
@@ -34,6 +35,58 @@ pid reg(max_sensor,P, 7,100,0, &SPIflag); // ПИД регулятор pid(max66
 SDBlockDevice sd(PB_15,PB_14,PB_13,PC_4);//mosi,miso,sclk,cs
 FATFileSystem fs("fs");
 Profiles pr;
+
+
+ProfilePoint *solderingPoints;
+string typeOfPoint;
+int valueOfPoint;
+
+void Soldering()
+{
+    if (!solderingPoints)
+    {
+        soldering.terminate();
+        
+        return;
+    }
+    while (solderingPoints->type!="none")
+    {
+        disp.ShowCurrentPoint(pr.GetProfileName(),solderingPoints->type,solderingPoints->value);
+        if (solderingPoints->type == "down")
+        {
+            disp.SetPreheatTemp(solderingPoints->value);
+            reg.SetTemperature(solderingPoints->value);
+            //disp.ShowPage2();
+            while (reg.temp()< solderingPoints->value)
+            {
+                ThisThread::sleep_for(1000);
+            }
+        }
+        if (solderingPoints->type == "wait")
+        {
+            ThisThread::sleep_for(solderingPoints->value*1000);
+        }
+        
+        solderingPoints = solderingPoints->next;
+        if (!solderingPoints)
+        {
+            reg.SetTemperature(20);
+            disp.SetPreheatTemp(20);
+            //disp.ShowPage2();
+            disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
+            soldering.terminate();
+
+            return;
+        }
+    }
+    reg.SetTemperature(20);
+    disp.SetPreheatTemp(20);
+    //disp.ShowPage2();
+    disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
+    soldering.terminate();
+    return;
+    
+}
 
 
 
@@ -103,15 +156,17 @@ void ReadCommands()
                     data = atoi(a+pos+1);
                 }
 
-                if (command=="sd") //sd - set down. Команда устанавливает температуру для нагрева нижним нагревателем
+                if (command=="stop") //sd - set down. Команда устанавливает температуру для нагрева нижним нагревателем
                 {
                     // по команде sd открывается страница с графиками, сейчас нужно будет передавать массивы точек
                      
                     
-                    disp.SetPreheatTemp(data); // зеленая линия на графике, указывающая температуру до которой нужно нагреть
+                    disp.SetPreheatTemp(0); // зеленая линия на графике, указывающая температуру до которой нужно нагреть
                     ThisThread::sleep_for(200); // пауза нужна для того, чтобы дисплей распознал команду(он только что передавал данные, теперь ему нужно их читать)
-                    disp.ShowPage2(); //функция переключает дисплей на страницу с графиками и передает массивы точек для графиков
-                    reg.SetTemperature(data); // даем задание ПИД регулятору
+                    //disp.ShowPage2(); //функция переключает дисплей на страницу с графиками и передает массивы точек для графиков
+                    disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
+                    reg.SetTemperature(0); // даем задание ПИД регулятору
+                    soldering.terminate();
                 }
                 if (command == "page") // если была нажата кнопка перехода на другую страницу дисплея
                 {
@@ -169,6 +224,14 @@ void ReadCommands()
                         disp.ShowPointPage(selectedPoint->type,selectedPoint->value);
                     }
                 }
+                if (command == "profstart")
+                {
+                    solderingPoints = pr.GetPoints();
+                    
+                    ThisThread::sleep_for(200); // пауза нужна для того, чтобы дисплей распознал команду(он только что передавал данные, теперь ему нужно их читать)
+                    disp.ShowPage2(); //функция переключает дисплей на страницу с графиками и передает массивы точек для графиков
+                    soldering.start(Soldering);
+                }
                
             }
         }
@@ -207,21 +270,6 @@ int main()
     {s.printf("Profiles file loaded\n\r");}
     if (pr.LoadProfiles())
     {s.printf("Profiles loaded\n\r");}
-    pr.SelectProfile(0);
-    s.printf("ProfileName = %s\n\r",pr.GetProfileName().c_str());
-    s.printf("Count of points = %d\n\r",pr.GetCountOfPoints());
-    ProfilePoint* points = pr.GetPoints();
-    while(points)
-    {
-        s.printf("Point type = %s; value=%d\n\r",points->type.c_str(),points->value);
-        points = points->next;
-
-    }
-    
-
-    //FILE* fd = fopen("/fs/hi.txt", "w");
-    //fprintf(fd, "hello!");
-    //fclose(fd);
 
     sd.deinit();
     fs.unmount();
