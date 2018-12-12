@@ -38,53 +38,53 @@ Profiles pr;
 
 
 ProfilePoint *solderingPoints;
-string typeOfPoint;
-int valueOfPoint;
+bool solderingFlag=0;
 
 void Soldering()
 {
-    if (!solderingPoints)
+    while (1)
     {
-        soldering.terminate();
-        
-        return;
-    }
-    while (solderingPoints->type!="none")
-    {
-        disp.ShowCurrentPoint(pr.GetProfileName(),solderingPoints->type,solderingPoints->value);
-        if (solderingPoints->type == "down")
+        if (solderingPoints&&solderingFlag)
         {
-            disp.SetPreheatTemp(solderingPoints->value);
-            reg.SetTemperature(solderingPoints->value);
-            //disp.ShowPage2();
-            while (reg.temp()< solderingPoints->value)
+            disp.ShowCurrentPoint(pr.GetProfileName(),solderingPoints->type,solderingPoints->value);
+            if (solderingPoints->type == "down")
             {
-                ThisThread::sleep_for(1000);
+                disp.SetPreheatTemp(solderingPoints->value);
+                reg.SetTemperature(solderingPoints->value);
+                //disp.ShowPage2();
+                while (reg.temp()< solderingPoints->value && solderingFlag)
+                {
+                    ThisThread::sleep_for(1000);
+                }
             }
-        }
-        if (solderingPoints->type == "wait")
-        {
-            ThisThread::sleep_for(solderingPoints->value*1000);
-        }
+            if (solderingPoints->type == "wait")
+            {
+                int ts = 0;
+                while (ts<solderingPoints->value && solderingFlag)
+                {
+                    ThisThread::sleep_for(1000);
+                    ts++;
+                }
+            }
+            if (solderingPoints->type == "none")
+            {
+                reg.SetTemperature(20);
+                disp.SetPreheatTemp(20);
+                //disp.ShowPage2();
+                disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
+            }
         
-        solderingPoints = solderingPoints->next;
-        if (!solderingPoints)
+            solderingPoints = solderingPoints->next;
+        }
+        else
         {
             reg.SetTemperature(20);
             disp.SetPreheatTemp(20);
             //disp.ShowPage2();
             disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
-            soldering.terminate();
-
-            return;
+            ThisThread::sleep_for(1000);
         }
     }
-    reg.SetTemperature(20);
-    disp.SetPreheatTemp(20);
-    //disp.ShowPage2();
-    disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
-    soldering.terminate();
-    return;
     
 }
 
@@ -166,7 +166,7 @@ void ReadCommands()
                     //disp.ShowPage2(); //функция переключает дисплей на страницу с графиками и передает массивы точек для графиков
                     disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
                     reg.SetTemperature(0); // даем задание ПИД регулятору
-                    soldering.terminate();
+                    solderingFlag = 0;
                 }
                 if (command == "page") // если была нажата кнопка перехода на другую страницу дисплея
                 {
@@ -230,7 +230,7 @@ void ReadCommands()
                     
                     ThisThread::sleep_for(200); // пауза нужна для того, чтобы дисплей распознал команду(он только что передавал данные, теперь ему нужно их читать)
                     disp.ShowPage2(); //функция переключает дисплей на страницу с графиками и передает массивы точек для графиков
-                    soldering.start(Soldering);
+                    solderingFlag = 1;
                 }
                
             }
@@ -277,6 +277,7 @@ int main()
     
     // запускаем поток для приема команд от дисплея
     th1.start(ReadCommands);
+    soldering.start(Soldering);
 
     int temp, tempu, tempc; // текущая температура. temp, tempu - для контрольных термопар; tempc - для температуры корпуса 
 

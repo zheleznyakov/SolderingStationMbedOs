@@ -209,6 +209,8 @@ void Display::ShowPointPage(string type,int val)
 }
 void Display::ShowCurrentPoint(string profileName,string type, int val)
 {
+    if (displayPage!=2)
+        return;
     while(!com.writable()){ThisThread::sleep_for(5);}
     com.printf("page2.pname.txt=\" %s\"%c%c%c",profileName.c_str(),255,255,255);
 
