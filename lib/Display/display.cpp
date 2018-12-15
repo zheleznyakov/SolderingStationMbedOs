@@ -76,7 +76,7 @@ void Display::Init(int temp_down,int temp_up)
     com.printf("h1.val=%d%c%c%c",15,255,255,255);
     com.printf("man_down.val=%d%c%c%c",15,255,255,255);
 }
-void Display::ShowInf(int temp_down,int temp_up,int temp_case)
+void Display::ShowInf(int temp_down,int temp_up,int temp_case, int sec)
 {
     // записываем текущую температуру в массивы для отображения на графиках
     graphDown[graphPos] = temp_down;
@@ -100,6 +100,7 @@ void Display::ShowInf(int temp_down,int temp_up,int temp_case)
         com.printf("tempz.val=%d%c%c%c",temp_down,255,255,255);
         com.printf("tempzup.val=%d%c%c%c",temp_up,255,255,255);
         com.printf("tempzcase.val=%d%c%c%c",temp_case,255,255,255);
+        com.printf("t0.txt=\"%02d:%02d\"%c%c%c",sec/60,sec%60,255,255,255);
     }
 
 }

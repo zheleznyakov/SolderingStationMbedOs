@@ -17,6 +17,11 @@
 #include "profile.h"
 using std::string;
 
+
+DigitalOut fanGND(PC_0);
+DigitalOut fanPower(PB_7);
+Timer tm;
+
 int SPIflag;
 Serial s(PA_2,PA_3);//tx,rx связь с компьютером по uart
 Serial s2(PC_10,PC_11);// tx, rx связь с экраном nextion по uart
@@ -46,6 +51,7 @@ void Soldering()
     {
         if (solderingPoints&&solderingFlag)
         {
+            tm.start();
             disp.ShowCurrentPoint(pr.GetProfileName(),solderingPoints->type,solderingPoints->value);
             if (solderingPoints->type == "down")
             {
@@ -78,6 +84,8 @@ void Soldering()
         }
         else
         {
+            tm.stop();
+            tm.reset();
             reg.SetTemperature(20);
             disp.SetPreheatTemp(20);
             //disp.ShowPage2();
@@ -281,9 +289,12 @@ int main()
 
     int temp, tempu, tempc; // текущая температура. temp, tempu - для контрольных термопар; tempc - для температуры корпуса 
 
+    fanGND = 0;
+    
+
     while(1) {
         ThisThread::sleep_for(1000);
-
+        
         while (SPIflag){ThisThread::sleep_for(10);}
         SPIflag = 1;
         temp = max_sensor.read_temp();
@@ -291,13 +302,18 @@ int main()
         tempu = max_sensor2.read_temp();
         ThisThread::sleep_for(10);
         tempc = max_sensor_overheat.read_temp();
+        if (tempc>35)
+            fanPower = 1;
+        if (temp<25)
+            fanPower =0;
+
         SPIflag = 0;
         // отображаем необходимую информацию на экране
         if (disp.GetCurrentPageNumber()==5||disp.GetCurrentPageNumber()==7)
         {
             disp.ShowProfilesListPage(pr.GetProfiles());
         }
-        disp.ShowInf(temp,tempu,tempc);
+        disp.ShowInf(temp,tempu,tempc, tm.read());
     }
 }
 
