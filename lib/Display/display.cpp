@@ -16,12 +16,19 @@ void Display::ShowPage2()
     com.printf("ref_stop%c%c%c",255,255,255); // команда сообщает дисплею, что пока не нужно обновлять инф. на дисплее
     com.printf("page %d%c%c%c",2,255,255,255);// отображаем 2 страницу на дисплее
     int j=graphPos;// узнаем текущее положение слайдера на массиве
-    for (int i=0;i<309;i++) // на график влазит 309 точек
+    for (int i=0;i<302;i++) // на график влазит 309 точек
     {
-        if (j>308) j=0;
-        com.printf("add 1,0,%d%c%c%c",graphDown[j],255,255,255); //синяя линия
-        com.printf("add 1,1,%d%c%c%c",graphUp[j],255,255,255); //желтая линия
-        com.printf("add 1,3,%d%c%c%c",graphPre,255,255,255); //зеленая линия
+        if (j>301) j=0;
+        int temp_down=graphDown[j]-50;
+        int temp_up= graphUp[j]-50;
+        int graphPre_temp = graphPre-50;
+        if (temp_down<0) temp_down = 0;
+        if (temp_up<0) temp_up = 0;
+        if (graphPre_temp<0) graphPre_temp=0;
+        while(!com.writable()){ThisThread::sleep_for(5);} 
+        com.printf("add 1,0,%d%c%c%c",temp_down,255,255,255); //синяя линия
+        com.printf("add 1,1,%d%c%c%c",temp_up,255,255,255); //желтая линия
+        com.printf("add 1,3,%d%c%c%c",graphPre_temp,255,255,255); //зеленая линия
         ThisThread::sleep_for(2);
         j++;
     }
@@ -92,15 +99,23 @@ void Display::ShowInf(int temp_down,int temp_up,int temp_case, int sec)
     if (displayPage==2)
     {
         while(!com.writable()){ThisThread::sleep_for(5);}
-        // отправляем точку на график
-        com.printf("add 1,0,%d%c%c%c",temp_down,255,255,255);
-        com.printf("add 1,1,%d%c%c%c",temp_up,255,255,255);
-        com.printf("add 1,3,%d%c%c%c",graphPre,255,255,255); //зеленая линия
+        
         // tempz - значение текущей температуры, отображаемое на странице Nextion с графиком
         com.printf("tempz.val=%d%c%c%c",temp_down,255,255,255);
         com.printf("tempzup.val=%d%c%c%c",temp_up,255,255,255);
         com.printf("tempzcase.val=%d%c%c%c",temp_case,255,255,255);
         com.printf("t0.txt=\"%02d:%02d\"%c%c%c",sec/60,sec%60,255,255,255);
+        // отправляем точку на график
+        temp_down-=50;
+        temp_up-=50;
+        int graphPre_temp = graphPre-50;
+        if (temp_down<0) temp_down = 0;
+        if (temp_up<0) temp_up = 0;
+        if (graphPre_temp<0) graphPre_temp=0;
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("add 1,0,%d%c%c%c",temp_down,255,255,255);
+        com.printf("add 1,1,%d%c%c%c",temp_up,255,255,255);
+        com.printf("add 1,3,%d%c%c%c",graphPre_temp,255,255,255); //зеленая линия
     }
 
 }
@@ -234,5 +249,13 @@ void Display::ShowCurrentPoint(string profileName,string type, int val)
     {
         while(!com.writable()){ThisThread::sleep_for(5);}
         com.printf("page2.operation.txt=\" Profile finished\"%c%c%c",255,255,255);
+    }
+}
+void Display::ShowTimer(int sec)
+{
+    if (displayPage==2)
+    {
+        while(!com.writable()){ThisThread::sleep_for(5);}
+        com.printf("t0.txt=\"%02d:%02d\"%c%c%c",sec/60,sec%60,255,255,255);
     }
 }

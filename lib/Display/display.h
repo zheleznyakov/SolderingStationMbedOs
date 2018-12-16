@@ -15,8 +15,8 @@ class Display
  * Для того, чтобы добавлять новые точки в массив не сдвигая его, есть переменная graphPos, которая скользит по массиву,
  * указывая на самый старый элемент, который можно переписывать новым значением
 */
-    int graphDown[309]; // график низ
-    int graphUp[309]; // график верх
+    int graphDown[302]; // график низ
+    int graphUp[302]; // график верх
     int graphPre; //значение температуры преднагрева
     int graphSold; //значение температуры пайки
     int graphPos; 
@@ -36,6 +36,7 @@ class Display
         void ClearPointsPage();
         void ShowPointPage(string type,int val);
         void ShowCurrentPoint(string profileName,string type, int val);
+        void ShowTimer(int sec);
 
 
 };

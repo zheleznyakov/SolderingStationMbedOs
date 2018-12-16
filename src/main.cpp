@@ -74,10 +74,13 @@ void Soldering()
             }
             if (solderingPoints->type == "none")
             {
-                reg.SetTemperature(20);
-                disp.SetPreheatTemp(20);
+                reg.SetTemperature(0);
+                disp.SetPreheatTemp(0);
                 //disp.ShowPage2();
                 disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
+                tm.stop();
+                tm.reset();
+                solderingFlag = 0;
             }
         
             solderingPoints = solderingPoints->next;
@@ -86,10 +89,11 @@ void Soldering()
         {
             tm.stop();
             tm.reset();
-            reg.SetTemperature(20);
-            disp.SetPreheatTemp(20);
+            reg.SetTemperature(0);
+            disp.SetPreheatTemp(0);
             //disp.ShowPage2();
             disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
+            solderingFlag=0;
             ThisThread::sleep_for(1000);
         }
     }
@@ -178,6 +182,8 @@ void ReadCommands()
                 }
                 if (command == "page") // если была нажата кнопка перехода на другую страницу дисплея
                 {
+                        disp.SetPreheatTemp(0);
+                        solderingFlag=0;
                         disp.ShowPage(data);
                 }
                 if (command == "back") // команда перехода на предыдущую страницу
@@ -291,7 +297,8 @@ int main()
 
     fanGND = 0;
     
-
+    bool n=0; //переменная, для того, чтобы выводить точки на график каждые две секунды
+    
     while(1) {
         ThisThread::sleep_for(1000);
         
@@ -302,9 +309,9 @@ int main()
         tempu = max_sensor2.read_temp();
         ThisThread::sleep_for(10);
         tempc = max_sensor_overheat.read_temp();
-        if (tempc>35)
+        if (tempc>45)
             fanPower = 1;
-        if (temp<25)
+        if (tempc<35)
             fanPower =0;
 
         SPIflag = 0;
@@ -313,7 +320,15 @@ int main()
         {
             disp.ShowProfilesListPage(pr.GetProfiles());
         }
-        disp.ShowInf(temp,tempu,tempc, tm.read());
+        if (n==0)
+        {
+            disp.ShowInf(temp,tempu,tempc, tm.read());
+        }
+        else
+        {
+            disp.ShowTimer(tm.read());
+        }
+        n=!n;
     }
 }
 
