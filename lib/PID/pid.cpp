@@ -80,7 +80,12 @@ void pid::Compute(void const *arguments)
     else{
         self->power = 0;
     }
-    self->pcontrol.SetDimming(self->power,self->power,self->power,self->power,1);
+    for (int i=0;i<5;i++)
+    {
+        //self->pcontrol.SetDimming(self->power,self->power,self->power,self->power,1);
+        if(self->heaters[i])
+            self->pcontrol.SetDimming(i,self->power);
+    }
 }
 
 int pid::Power()
@@ -105,4 +110,13 @@ void pid::setMaxPower(int x)
     }
     if (x<0) maxPower = 0;
 
+}
+//selctHeaters выбор нагревателей заполняет массив heaters[5]
+void pid::selectHeaters(bool h1,bool h2,bool h3,bool h4,bool h5)
+{
+    heaters[0]=h1;
+    heaters[1]=h2;
+    heaters[2]=h3;
+    heaters[3]=h4;
+    heaters[4]=h5;
 }

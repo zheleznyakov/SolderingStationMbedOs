@@ -29,7 +29,7 @@ void Display::ShowPage2()
         com.printf("add 1,0,%d%c%c%c",temp_down,255,255,255); //синяя линия
         com.printf("add 1,1,%d%c%c%c",temp_up,255,255,255); //желтая линия
         com.printf("add 1,3,%d%c%c%c",graphPre_temp,255,255,255); //зеленая линия
-        ThisThread::sleep_for(2);
+        ThisThread::sleep_for(5);
         j++;
     }
     com.printf("ref_star%c%c%c",255,255,255); // разрешаем дисплею отобразить изменения

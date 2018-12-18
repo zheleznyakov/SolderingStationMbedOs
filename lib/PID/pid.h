@@ -29,6 +29,7 @@ private:
 
     RtosTimer *tim2; // таймер вызывает функцию Compute для вычисления мощности
     volatile int power; // рассчитанная мощность
+    bool heaters[5]={0,0,0,0,0};// массив нагревателей. допустим 0,1,0,1,0 - использовать первый и третий нагреватель
 
     static void Compute(void const *arguments); // функция вычисляет можность исодя из заданной и текущей температуры
 public:
@@ -38,6 +39,7 @@ public:
     int Power(); // возвращает рассчитанную мощность
     float temp(); // возвращает текущую температуру из датчика max6675
     void setMaxPower(int x); // ограничивает максимальную мощность
+    void selectHeaters(bool h1,bool h2,bool h3,bool h4,bool h5);//выбор нагревателей заполняет массив heaters[5]
 };
 
 #endif
