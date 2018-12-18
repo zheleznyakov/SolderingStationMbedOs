@@ -3,26 +3,30 @@ Display::Display(Serial &s):com(s)
 {
     displayPage = 0;
     prevPage = 0;
-    graphPre=15;
+    graphPre=0;
 }
 
 void Display::ShowPage2()
 {
+    int temp_down=0;
+    int temp_up=0;
+    int graphPre_temp = 0;
+    int graphSold_temp = 0;
     // устанавливаем текущую странцу дисплея в 0, чтобы не шёл лишний обмен данными с экраном
     // на нулевой странице нет обновляемых данных
     prevPage = displayPage;
     displayPage=0;
     while(!com.writable()){ThisThread::sleep_for(5);} 
-    com.printf("ref_stop%c%c%c",255,255,255); // команда сообщает дисплею, что пока не нужно обновлять инф. на дисплее
+    //com.printf("ref_stop%c%c%c",255,255,255); // команда сообщает дисплею, что пока не нужно обновлять инф. на дисплее
     com.printf("page %d%c%c%c",2,255,255,255);// отображаем 2 страницу на дисплее
     int j=graphPos;// узнаем текущее положение слайдера на массиве
     for (int i=0;i<302;i++) // на график влазит 309 точек
     {
         if (j>301) j=0;
-        int temp_down=graphDown[j]-50;
-        int temp_up= graphUp[j]-50;
-        int graphPre_temp = graphPre-50;
-        int graphSold_temp = graphSold-50;
+        temp_down=graphDown[j]-50;
+        temp_up= graphUp[j]-50;
+        graphPre_temp = graphPre-50;
+        graphSold_temp = graphSold-50;
         if (temp_down<0) temp_down = 0;
         if (temp_up<0) temp_up = 0;
         if (graphPre_temp<0) graphPre_temp=0;
@@ -35,7 +39,7 @@ void Display::ShowPage2()
         ThisThread::sleep_for(5);
         j++;
     }
-    com.printf("ref_star%c%c%c",255,255,255); // разрешаем дисплею отобразить изменения
+   // com.printf("ref_star%c%c%c",255,255,255); // разрешаем дисплею отобразить изменения
     displayPage = 2; 
 }
 void Display::ShowPage(int n)
@@ -88,11 +92,13 @@ void Display::Init(int temp_down,int temp_up)
 }
 void Display::ShowInf(int temp_down,int temp_up,int temp_case, int sec)
 {
+    int graphPre_temp = 0;
+    int graphSold_temp = 0;
     // записываем текущую температуру в массивы для отображения на графиках
     graphDown[graphPos] = temp_down;
     graphUp[graphPos] = temp_up;
     graphPos++;
-    if (graphPos>308) graphPos=0;
+    if (graphPos>301) graphPos=0;
 
     if (displayPage == 1){
         while(!com.writable()){ThisThread::sleep_for(5);}
@@ -111,8 +117,8 @@ void Display::ShowInf(int temp_down,int temp_up,int temp_case, int sec)
         // отправляем точку на график
         temp_down-=50;
         temp_up-=50;
-        int graphPre_temp = graphPre-50;
-        int graphSold_temp = graphSold-50;
+        graphPre_temp = graphPre-50;
+        graphSold_temp = graphSold-50;
         if (temp_down<0) temp_down = 0;
         if (temp_up<0) temp_up = 0;
         if (graphPre_temp<0) graphPre_temp=0;
@@ -268,4 +274,8 @@ void Display::ShowTimer(int sec)
         while(!com.writable()){ThisThread::sleep_for(5);}
         com.printf("t0.txt=\"%02d:%02d\"%c%c%c",sec/60,sec%60,255,255,255);
     }
+}
+int Display::getGraphPre()
+{
+    return graphPre;
 }

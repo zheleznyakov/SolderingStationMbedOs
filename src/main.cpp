@@ -344,6 +344,8 @@ int main()
         if (n==0)
         {
             disp.ShowInf(temp,tempu,tempc, tm.read());
+            s.printf("Preheat = %d\n\r",disp.getGraphPre());
+
         }
         else
         {
