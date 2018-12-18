@@ -36,6 +36,7 @@ max6675 max_sensor2(spi,PA_8); // SPI, CS - chip select вторая термо�
 max6675 max_sensor_overheat(spi,PA_9); // SPI, CS - chip select термопара для измерения температуры корпуса
 
 pid reg(max_sensor,P, 7,100,0, &SPIflag); // ПИД регулятор pid(max6675 obj, powercontrol obj, kp, kd, ki)
+pid regUP(max_sensor2,P,7,100,0,&SPIflag);
 
 SDBlockDevice sd(PB_15,PB_14,PB_13,PC_4);//mosi,miso,sclk,cs
 FATFileSystem fs("fs");
@@ -63,6 +64,16 @@ void Soldering()
                     ThisThread::sleep_for(1000);
                 }
             }
+            if (solderingPoints->type == "up")
+            {
+                disp.SetSolderingTemp(solderingPoints->value);
+                regUP.SetTemperature(solderingPoints->value);
+                //disp.ShowPage2();
+                while (regUP.temp()< solderingPoints->value && solderingFlag)
+                {
+                    ThisThread::sleep_for(1000);
+                }
+            }
             if (solderingPoints->type == "wait")
             {
                 int ts = 0;
@@ -75,6 +86,9 @@ void Soldering()
             if (solderingPoints->type == "none")
             {
                 reg.SetTemperature(0);
+                regUP.SetTemperature(0);
+
+                disp.SetSolderingTemp(0);
                 disp.SetPreheatTemp(0);
                 //disp.ShowPage2();
                 disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
@@ -90,7 +104,10 @@ void Soldering()
             tm.stop();
             tm.reset();
             reg.SetTemperature(0);
+            regUP.SetTemperature(0);
+
             disp.SetPreheatTemp(0);
+            disp.SetSolderingTemp(0);
             //disp.ShowPage2();
             disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
             solderingFlag=0;
@@ -173,11 +190,11 @@ void ReadCommands()
                     // по команде sd открывается страница с графиками, сейчас нужно будет передавать массивы точек
                      
                     
-                    disp.SetPreheatTemp(0); // зеленая линия на графике, указывающая температуру до которой нужно нагреть
-                    ThisThread::sleep_for(200); // пауза нужна для того, чтобы дисплей распознал команду(он только что передавал данные, теперь ему нужно их читать)
+                    //disp.SetPreheatTemp(0); // зеленая линия на графике, указывающая температуру до которой нужно нагреть
+                    //ThisThread::sleep_for(200); // пауза нужна для того, чтобы дисплей распознал команду(он только что передавал данные, теперь ему нужно их читать)
                     //disp.ShowPage2(); //функция переключает дисплей на страницу с графиками и передает массивы точек для графиков
-                    disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
-                    reg.SetTemperature(0); // даем задание ПИД регулятору
+                   // disp.ShowCurrentPoint(pr.GetProfileName(),"none",0);
+                   // reg.SetTemperature(0); // даем задание ПИД регулятору
                     solderingFlag = 0;
                 }
                 if (command == "page") // если была нажата кнопка перехода на другую страницу дисплея
@@ -268,6 +285,9 @@ int main()
     reg.selectHeaters(1,1,1,1,0);
     // уставка температуры при включении питания
     reg.SetTemperature(0);
+
+    regUP.selectHeaters(0,0,0,0,1);
+    regUP.SetTemperature(0);
 
     SPIflag = false; //spi не занят
     ThisThread::sleep_for(200);

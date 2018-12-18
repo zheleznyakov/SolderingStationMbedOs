@@ -30,6 +30,7 @@ class Display
         void Init(int temp_down,int temp_up);
         void ShowInf(int temp_down,int temp_up,int temp_case, int sec);
         void SetPreheatTemp(int t);
+        void SetSolderingTemp(int t);
         int GetCurrentPageNumber();
         void ShowProfilesListPage(Profile_Id_Title *all_profiles);
         void ShowSelectedProfile(ProfilePoint *points, string ProfileName);

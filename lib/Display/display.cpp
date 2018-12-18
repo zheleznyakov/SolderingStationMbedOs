@@ -22,12 +22,15 @@ void Display::ShowPage2()
         int temp_down=graphDown[j]-50;
         int temp_up= graphUp[j]-50;
         int graphPre_temp = graphPre-50;
+        int graphSold_temp = graphSold-50;
         if (temp_down<0) temp_down = 0;
         if (temp_up<0) temp_up = 0;
         if (graphPre_temp<0) graphPre_temp=0;
+        if (graphSold_temp<0) graphSold_temp=0;
         while(!com.writable()){ThisThread::sleep_for(5);} 
         com.printf("add 1,0,%d%c%c%c",temp_down,255,255,255); //синяя линия
         com.printf("add 1,1,%d%c%c%c",temp_up,255,255,255); //желтая линия
+        com.printf("add 1,2,%d%c%c%c",graphSold_temp,255,255,255); //красная
         com.printf("add 1,3,%d%c%c%c",graphPre_temp,255,255,255); //зеленая линия
         ThisThread::sleep_for(5);
         j++;
@@ -109,12 +112,15 @@ void Display::ShowInf(int temp_down,int temp_up,int temp_case, int sec)
         temp_down-=50;
         temp_up-=50;
         int graphPre_temp = graphPre-50;
+        int graphSold_temp = graphSold-50;
         if (temp_down<0) temp_down = 0;
         if (temp_up<0) temp_up = 0;
         if (graphPre_temp<0) graphPre_temp=0;
+        if (graphSold_temp<0) graphSold_temp=0;
         while(!com.writable()){ThisThread::sleep_for(5);}
         com.printf("add 1,0,%d%c%c%c",temp_down,255,255,255);
         com.printf("add 1,1,%d%c%c%c",temp_up,255,255,255);
+        com.printf("add 1,2,%d%c%c%c",graphSold_temp,255,255,255); //красная
         com.printf("add 1,3,%d%c%c%c",graphPre_temp,255,255,255); //зеленая линия
     }
 
@@ -122,6 +128,10 @@ void Display::ShowInf(int temp_down,int temp_up,int temp_case, int sec)
 void Display::SetPreheatTemp(int t)
 {
     graphPre = t;
+}
+void Display::SetSolderingTemp(int t)
+{
+    graphSold = t;
 }
 int Display::GetCurrentPageNumber()
 {
