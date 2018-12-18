@@ -15,11 +15,11 @@ PowerControl::PowerControl(PinName ZeroCross,PinName h1, PinName h2, PinName h3,
 {
     // 120 - примерно полнакала (значение по умолчанию)
     setD();
-    dim1 = 120;
-    dim2 = 120;
-    dim3 = 120;
-    dim4 = 120;
-    dimup = 120;
+    dim1 = 0;
+    dim2 = 0;
+    dim3 = 0;
+    dim4 = 0;
+    dimup = 0;
     
     ZeroCross_.rise(callback(this,&PowerControl::Crossing)); // инициализация прерывания для детектора 0
 
@@ -33,6 +33,7 @@ void PowerControl::Crossing()
     t2.attach_us(callback(this,&PowerControl::DimHeater2UP),d[dim2]);
     t3.attach_us(callback(this,&PowerControl::DimHeater3UP),d[dim3]);
     t4.attach_us(callback(this,&PowerControl::DimHeater4UP),d[dim4]);
+    if(dimup)
     t5.attach_us(callback(this,&PowerControl::DimHeater5UP),d[dimup]);
 } 
 // SetDimming задает мощность каждого из симисторов от 0 до 250
@@ -43,6 +44,21 @@ void PowerControl::SetDimming(int d1, int d2, int d3, int d4, int dup)
     dim3 = d3;
     dim4 = d4;
     dimup = dup;
+}
+//устанавливает значение мощности value для одного канала heaterNuber
+void PowerControl::SetDimming(int heaterNumber,int value)
+{
+    if (heaterNumber==0)
+        dim1=value;
+    if (heaterNumber==1)
+        dim2=value;
+    if (heaterNumber==2)
+        dim3=value;
+    if (heaterNumber==3)
+        dim4=value;
+    if (heaterNumber==4)
+        dimup = value;
+
 }
 // DimHeater1UP() обработчик таймера, включающий перывый симистор
 void PowerControl::DimHeater1UP()

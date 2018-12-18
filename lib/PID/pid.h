@@ -15,12 +15,12 @@
 class pid
 {
 private:
-    double kp; // коэффицент пропорционального регулятора
-    double ki; 
-    int kd;
-    int previousError;
-    double integral;
-    int *spiFlag;
+    double kp; // коэффициент пропорционального регулятора
+    double ki;  //интегрирующий кожэффициент
+    int kd; // дифференцирующий коэффициент
+    int previousError; //ошибка на предыдущем шаге для вычисления дифференцирующ. составляющей
+    double integral; // накопленная ошибка
+    int *spiFlag; // ссылка на флаг, который сигнализирует о том, что spi занят
     max6675 &max; // ссылка на объект термопары
     PowerControl &pcontrol; // ссылка на фазовый регулятор
     float requered_temp; // требуемая температура
@@ -29,6 +29,7 @@ private:
 
     RtosTimer *tim2; // таймер вызывает функцию Compute для вычисления мощности
     volatile int power; // рассчитанная мощность
+    bool heaters[5]={0,0,0,0,0};// массив нагревателей. допустим 0,1,0,1,0 - использовать первый и третий нагреватель
 
     static void Compute(void const *arguments); // функция вычисляет можность исодя из заданной и текущей температуры
 public:
@@ -37,7 +38,8 @@ public:
     void SetTemperature(float t_); // задает требуемую температуру
     int Power(); // возвращает рассчитанную мощность
     float temp(); // возвращает текущую температуру из датчика max6675
-    void setMaxPower(int x);
+    void setMaxPower(int x); // ограничивает максимальную мощность
+    void selectHeaters(bool h1,bool h2,bool h3,bool h4,bool h5);//выбор нагревателей заполняет массив heaters[5]
 };
 
 #endif
