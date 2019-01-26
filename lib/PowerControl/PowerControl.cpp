@@ -33,7 +33,7 @@ void PowerControl::Crossing()
     t2.attach_us(callback(this,&PowerControl::DimHeater2UP),d[dim2]);
     t3.attach_us(callback(this,&PowerControl::DimHeater3UP),d[dim3]);
     t4.attach_us(callback(this,&PowerControl::DimHeater4UP),d[dim4]);
-    if(dimup)
+    if(dimup) //устранение дребезга при 0 знач
     t5.attach_us(callback(this,&PowerControl::DimHeater5UP),d[dimup]);
 } 
 // SetDimming задает мощность каждого из симисторов от 0 до 250

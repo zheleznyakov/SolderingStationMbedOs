@@ -48,6 +48,7 @@ bool solderingFlag=0;
 
 void Soldering()
 {
+    s.printf("thread started\n\r");
     while (1)
     {
         if (solderingPoints&&solderingFlag)
@@ -311,7 +312,9 @@ int main()
 
     
     // запускаем поток для приема команд от дисплея
+    s.printf("Starting reading commands from display...\n\r");
     th1.start(ReadCommands);
+    s.printf("Starting soldering thread \n\r");
     soldering.start(Soldering);
 
     int temp, tempu, tempc; // текущая температура. temp, tempu - для контрольных термопар; tempc - для температуры корпуса 
@@ -319,6 +322,7 @@ int main()
     fanGND = 0;
     
     bool n=0; //переменная, для того, чтобы выводить точки на график каждые две секунды
+    s.printf("Starting...\n\r");
     
     while(1) {
         ThisThread::sleep_for(1000);

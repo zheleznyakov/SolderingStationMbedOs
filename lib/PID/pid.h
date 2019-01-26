@@ -31,7 +31,7 @@ private:
     volatile int power; // рассчитанная мощность
     bool heaters[5]={0,0,0,0,0};// массив нагревателей. допустим 0,1,0,1,0 - использовать первый и третий нагреватель
 
-    static void Compute(void const *arguments); // функция вычисляет можность исодя из заданной и текущей температуры
+    static void Compute(void const *arguments); // функция вычисляет мощность исодя из заданной и текущей температуры
 public:
     pid(max6675 &m, PowerControl &pc,double kp_, int kd_, double ki_, int *flag);
     float ReadTemp(); // возвращает текущую температуру не опрашивая термопару
